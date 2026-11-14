@@ -1,8 +1,8 @@
 // Base en mémoire + localStorage, partagée entre onglets (BroadcastChannel + événement « storage »).
-import { seedState } from '../../lib/seeds'
+import { SYSTEM_ACTOR, seedState } from '../../lib/seeds'
 import type { DbState } from '../types'
 
-export const STORAGE_KEY = 'vigilis.demo.v1'
+export const STORAGE_KEY = 'vigilis.demo.v2'
 const CHANNEL = 'vigilis-demo'
 
 function readStorage(): DbState | null {
@@ -55,13 +55,17 @@ export const db = {
     channel?.postMessage('changed')
     notify()
   },
-  reset(): void {
+  /** Remet tout à zéro (incidents, pannes, résolutions, préférences), puis trace la réinitialisation. */
+  reset(actorName: string = SYSTEM_ACTOR): void {
     try {
       localStorage.removeItem(STORAGE_KEY)
     } catch {
       /* ignoré */
     }
-    state = seedState()
+    const fresh = seedState()
+    const at = new Date().toISOString()
+    fresh.logs.push({ id: `log-reset-${Date.now()}`, incidentId: null, kind: 'reinitialisation', action: 'Réinitialisation de la démo', actor: actorName, at })
+    state = fresh
     writeStorage(state)
     channel?.postMessage('changed')
     notify()

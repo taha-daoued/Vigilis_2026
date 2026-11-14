@@ -1,16 +1,22 @@
-// Store des incidents : lit la couche services et se met à jour à chaque notification (temps réel simulé).
+// Store des données : lit la couche services et se met à jour à chaque notification (temps réel simulé).
 import { create } from 'zustand'
-import { incidentsApi } from '../services'
-import type { AlertLog, Camera, Incident } from '../services'
+import { incidentsApi, prefsApi } from '../services'
+import type { AlertLog, Camera, Incident, PrivacyPrefs, SystemHealth } from '../services'
+import { DEFAULT_PREFS } from '../lib/seeds'
 
 interface DataState {
   incidents: Incident[]
   cameras: Camera[]
   logs: AlertLog[]
+  health: SystemHealth | null
+  prefs: Record<string, PrivacyPrefs>
   ready: boolean
 }
 
-export const useData = create<DataState>(() => ({ incidents: [], cameras: [], logs: [], ready: false }))
+export const useData = create<DataState>(() => ({ incidents: [], cameras: [], logs: [], health: null, prefs: {}, ready: false }))
+
+/** Préférences d'un utilisateur (valeurs par défaut tant que rien n'est enregistré). */
+export const selectPrefs = (userId: string | undefined) => (s: DataState): PrivacyPrefs => (userId && s.prefs[userId]) || DEFAULT_PREFS
 
 type ArrivalListener = (incident: Incident) => void
 const arrivalListeners = new Set<ArrivalListener>()
@@ -22,10 +28,16 @@ export function onIncidentArrival(l: ArrivalListener): () => void {
 
 let started = false
 async function refresh(): Promise<void> {
-  const [incidents, cameras, logs] = await Promise.all([incidentsApi.list(), incidentsApi.listCameras(), incidentsApi.listLogs()])
+  const [incidents, cameras, logs, health, prefs] = await Promise.all([
+    incidentsApi.list(),
+    incidentsApi.listCameras(),
+    incidentsApi.listLogs(),
+    incidentsApi.getHealth(),
+    prefsApi.getAll(),
+  ])
   const known = new Set(useData.getState().incidents.map((i) => i.id))
   const wasReady = useData.getState().ready
-  useData.setState({ incidents, cameras, logs, ready: true })
+  useData.setState({ incidents, cameras, logs, health, prefs, ready: true })
   if (wasReady) incidents.filter((i) => !known.has(i.id)).forEach((i) => arrivalListeners.forEach((l) => l(i)))
 }
 

@@ -10,5 +10,5 @@ if (mode !== 'mock') {
 }
 
 export const services: Services = mockServices
-export const { incidents: incidentsApi, auth: authApi, sos: sosApi } = services
+export const { incidents: incidentsApi, auth: authApi, sos: sosApi, prefs: prefsApi } = services
 export type * from './types'

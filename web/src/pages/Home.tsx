@@ -1,9 +1,15 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { DemoBanner } from '../components/DemoBanner'
+import { TourButton } from '../components/RoleSwitcher'
+import { tourAlreadySeen, useUi } from '../stores/ui'
 
 const FLOW = ['Caméra', 'Analyse IA (pose + vidéo)', 'Moteur de décision', 'Alerte', 'Carte admin']
 
 export function Home() {
+  const openTour = useUi((s) => s.openTour)
+  // Visite guidée proposée à la première visite ; relançable ensuite avec le bouton.
+  useEffect(() => { if (!tourAlreadySeen()) openTour() }, [openTour])
   return (
     <div className="min-h-full bg-bg text-ink">
       <DemoBanner />
@@ -17,6 +23,7 @@ export function Home() {
         <div className="mt-6 flex flex-wrap gap-3">
           <Link to="/login" state={{ role: 'user' }} className="btn btn-primary">Espace utilisateur</Link>
           <Link to="/login" state={{ role: 'admin' }} className="btn">Espace administrateur</Link>
+          <TourButton />
         </div>
 
         <section aria-labelledby="flux" className="mt-10">

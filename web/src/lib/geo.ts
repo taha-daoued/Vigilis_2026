@@ -1,4 +1,5 @@
-import type { LatLng } from '../services/types'
+import type { Camera, LatLng } from '../services/types'
+import { distanceMeters } from './proximity'
 
 /** Centre de la démo : VITE_DEMO_CENTER="lat,lng" (par défaut Lagos, Nigeria). */
 function parseCenter(raw: string | undefined): LatLng {
@@ -18,4 +19,12 @@ export function offsetMeters(origin: LatLng, dx: number, dy: number): LatLng {
 
 export function formatPosition(p: LatLng): string {
   return `${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`
+}
+
+/** Lieu lisible pour l'utilisateur : « Près de Parking (adresse simulée) » + coordonnées arrondies. */
+export function placeLabel(p: LatLng | null, cameras: Camera[]): string {
+  if (!p) return 'Position non transmise'
+  const rounded = `${p.lat.toFixed(3)}, ${p.lng.toFixed(3)}`
+  const nearest = [...cameras].sort((a, b) => distanceMeters(a.position, p) - distanceMeters(b.position, p))[0]
+  return nearest ? `Près de « ${nearest.name} » (adresse simulée) · ${rounded}` : rounded
 }

@@ -1,6 +1,6 @@
 // Badges de type et de statut : l'information n'est JAMAIS portée par la couleur seule (forme + texte).
-import type { IncidentStatus, IncidentType } from '../services'
-import { STATUS_LABEL, TYPE_LABEL } from '../lib/format'
+import type { IncidentStatus, IncidentType, Resolution } from '../services'
+import { RESOLUTION_LABEL, STATUS_LABEL, TYPE_LABEL } from '../lib/format'
 import { TYPE_COLOR, TYPE_GLYPH, TYPE_SHAPE } from '../lib/typeStyle'
 
 export function TypeShape({ type, size = 18 }: { type: IncidentType; size?: number }) {
@@ -22,6 +22,14 @@ export function ExperimentalBadge() {
   return (
     <span className="inline-flex items-center rounded border border-dashed border-line px-1.5 py-0.5 text-xs font-semibold text-muted">
       Expérimental
+    </span>
+  )
+}
+
+export function SimulatedBadge() {
+  return (
+    <span className="inline-flex items-center rounded border border-line bg-surface-2 px-1.5 py-0.5 text-xs font-semibold text-muted">
+      Simulé
     </span>
   )
 }
@@ -48,6 +56,16 @@ export function StatusBadge({ status, label }: { status: IncidentStatus; label?:
     <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-bold ${s.cls}`}>
       <span aria-hidden="true">{s.icon}</span>
       {label ?? STATUS_LABEL[status]}
+    </span>
+  )
+}
+
+export function ResolutionBadge({ resolution }: { resolution: Resolution }) {
+  const confirmed = resolution === 'confirme'
+  return (
+    <span className={`inline-flex items-center gap-1 rounded border px-2 py-0.5 text-xs font-bold ${confirmed ? 'border-ok text-ok' : 'border-line text-muted'}`}>
+      <span aria-hidden="true">{confirmed ? '✓' : '⚑'}</span>
+      {RESOLUTION_LABEL[resolution]}
     </span>
   )
 }
