@@ -12,8 +12,8 @@
   --color-brand-300: #93b4fb;
 
   /* Types d'incident (jamais seuls : toujours avec forme + libellé) */
-  --color-violence: #dc2626;
-  --color-chute: #d97706;
+  --color-violence: #e11d48;
+  --color-chute: #bf8a00;
   --color-sos: #7c3aed;
   --color-vol: #0d9488;
 }

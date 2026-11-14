@@ -2,7 +2,7 @@
 
 Plateforme de détection et de signalement des situations à risque (violence, chute / malaise, SOS ; vol expérimental). Le système détecte tôt et alerte vite ; il ne prédit pas.
 
-**Version actuelle : V1 démo statique.** 100 % dans le navigateur : aucune API, aucun Firebase, aucun backend, aucun modèle IA. Toutes les données sont simulées.
+**Version actuelle : V1.1 (vues globales admin et utilisateur), toujours en démo statique.** Voir [CHANGELOG.md](CHANGELOG.md). 100 % dans le navigateur : aucune API, aucun Firebase, aucun backend, aucun modèle IA. Toutes les données sont simulées.
 
 ## Lancer
 ```bash
@@ -40,6 +40,8 @@ HTTPS est utile : la géolocalisation navigateur l'exige.
 | Incidents, journal d'audit | En mémoire + localStorage, synchronisés entre onglets | FastAPI + Firestore (`firebase-admin`) |
 | Temps réel | BroadcastChannel / événement `storage` | WebSocket FastAPI |
 | Détection | Simulateur + page « Détection » illustrative | Service IA Python (pose + violence + règles de chute) |
+| Santé, latence, pannes caméra | Simulées | Mesures réelles du service IA, de l'API et du temps réel |
+| Statistiques, fausses alertes | Calculées sur les données simulées | Calculées sur les vraies résolutions des admins |
 | Images | Vignettes SVG, visages floutés | Images réelles floutées |
 | Notifications | Toast dans l'interface | FCM / e-mail |
 
@@ -48,7 +50,7 @@ Aucun indicateur de performance n'est affiché : « À mesurer ». Le vol est ex
 ## Passer en mode FastAPI (V2) : fichiers à remplacer
 1. Créer `web/src/services/http/` (implémentations de `IncidentsApi`, `AuthApi`, `SosApi`, voir son README).
 2. Modifier `web/src/services/index.ts` pour exposer cette implémentation quand `VITE_DATA_MODE=http`.
-3. Retirer le simulateur : `web/src/lib/simulator.ts` et son usage dans `web/src/pages/AdminDashboard.tsx` (boutons de scénario, pause).
+3. Retirer le simulateur : `web/src/lib/simulator.ts` et ses usages dans `web/src/components/AdminShell.tsx` (démarrage) et `web/src/pages/CommandCenter.tsx` (boutons de scénario, pause). Remplacer aussi la panne caméra simulée (`AdminHealth`) et la latence simulée (`services/mock`).
 4. Retirer le bouton « Réinitialiser la démo » de `web/src/components/AdminShell.tsx`.
 5. `web/src/lib/seeds.ts` et `web/src/services/mock/` ne servent plus qu'aux tests.
 Les écrans, stores et composants n'importent jamais `mock/` : ils ne changent pas.
@@ -57,7 +59,7 @@ Les écrans, stores et composants n'importent jamais `mock/` : ils ne changent p
 ```
 web/src/services   contrats (api.ts, types.ts), mock/, http/ (V2)
 web/src/stores     session, données, toasts (Zustand)
-web/src/pages      Home, Login, UserApp, AdminDashboard, AdminDetection, AdminEvaluation, AdminAudit
+web/src/pages      Home, Login, CommandCenter, AdminHealth, AdminStats, AdminAudit, AdminDetection, AdminEvaluation, UserHome, UserAlerts, UserMap, UserPrivacy, UserContacts
 web/src/components carte, liste, détail, badges, shells
 web/src/lib        seeds, simulateur, moteur de décision, utilitaires
 docs/              PLANNING.md, DESIGN_SYSTEM.md, DEMO_SCRIPT.md

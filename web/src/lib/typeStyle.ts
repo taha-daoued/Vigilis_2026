@@ -1,8 +1,8 @@
 import type { IncidentType } from '../services/types'
 
 export const TYPE_COLOR: Record<IncidentType, string> = {
-  violence: '#dc2626',
-  chute: '#d97706',
+  violence: '#e11d48',
+  chute: '#bf8a00',
   sos: '#7c3aed',
   vol: '#0d9488',
 }

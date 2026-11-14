@@ -7,6 +7,7 @@ import { TypeShape } from './badges'
 
 const DAY = 24 * 3_600_000
 const LANE_H = 26
+const MAX_LANES = 3
 const MIN_GAP = 0.022 // écart minimal (part de la largeur) entre deux points d'une même ligne
 const PEAK = 3 // à partir de 3 incidents dans la même heure : « pic »
 
@@ -20,7 +21,7 @@ export const DayTimeline = memo(function DayTimeline({ incidents, selectedId, on
     const dots = inWindow.map((i) => {
       const x = (+new Date(i.createdAt) - start) / DAY
       let lane = lastX.findIndex((lx) => x - lx >= MIN_GAP)
-      if (lane === -1) lane = lastX.length
+      if (lane === -1) lane = Math.min(lastX.length, MAX_LANES - 1) // au-delà, les points se superposent dans la dernière ligne
       lastX[lane] = x
       return { i, x, lane }
     })

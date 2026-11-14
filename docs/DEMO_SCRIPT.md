@@ -1,17 +1,19 @@
-# Déroulé de démonstration : 5 minutes (V1, données simulées)
+# Déroulé de démonstration : 5 minutes (V1.1, données simulées)
 
-Prérequis : `npm run build && npm run preview` dans `web/` (ou le site hébergé). Deux fenêtres de navigateur côte à côte, **même navigateur** (les onglets partagent les données via le navigateur).
+Prérequis : `npm run build && npm run preview` dans `web/` (ou le site hébergé). Deux fenêtres du **même navigateur** côte à côte (elles partagent les données via le navigateur). Avant de commencer : `/admin` puis **Réinitialiser la démo**. Si une session est déjà ouverte dans l'une des fenêtres, la recharger après avoir changé de compte (la session est partagée entre onglets).
 
 | Min | Action | À dire |
 |---|---|---|
-| 0:00 | Ouvrir `/`. | « Vigilis détecte et alerte, il ne prédit pas. Une caméra analysée par l'IA et un bouton SOS alimentent une même carte. » Montrer le schéma, « 24/7 = architecture cible ». |
-| 0:45 | Fenêtre A : `/login` → **Se connecter en tant qu'admin**. | Carte, caméras, 14 incidents de départ, compteurs. Bandeau « Version démo : données simulées ». |
-| 1:30 | Attendre ou cliquer **Scénario : Violence**. | Toast + marqueur qui pulse : un incident arrive seul toutes les 20-40 s. |
-| 2:00 | Ouvrir l'incident → **Prendre en charge** → **Clôturer**. | Détail, score, fenêtres confirmées, historique. Chaque action est écrite dans le journal d'audit. |
-| 2:45 | Fenêtre B : `/login` → **Se connecter en tant qu'utilisateur** → maintenir **SOS** 1,5 s. | Consentement GPS ; position réelle ou simulée, expliquée. Le SOS ne passe pas par l'IA. |
-| 3:15 | Regarder la fenêtre A. | Le SOS apparaît en moins d'une seconde. Le passer en cours puis clôturé : la fenêtre B affiche « Prise en charge » puis « Clôturée ». |
-| 3:45 | Fenêtre B : ouvrir `/admin`. | Refusé : les rôles sont appliqués. |
-| 4:00 | Fenêtre A : **Détection**. | Score, seuil, « fenêtres consécutives 3/3 », alerte. Une pointe isolée ne déclenche rien. Mention : illustration, l'analyse réelle viendra du service IA. |
-| 4:30 | **Performance et conformité** puis **Réinitialiser la démo**. | Aucun chiffre inventé : « À mesurer », objectif de latence < 3 s. Vol = expérimental. Prochaines étapes : service IA + backend FastAPI (V2). |
+| 0:00 | Ouvrir `/` ; la visite guidée (3 bulles) s'ouvre à la première visite, sinon bouton **Visite guidée**. | « Vigilis détecte et alerte, il ne prédit pas. Caméra → IA → décision → alerte → carte, et le SOS en voie directe. » « 24/7 = architecture cible. » |
+| 0:45 | Fenêtre A : **Se connecter en tant qu'admin**. | Centre de commande : bande d'état (nouveaux, en cours, temps moyen de prise en charge, caméras, service IA **Simulé**), carte, file de priorité, frise des 24 h. |
+| 1:15 | Regarder la file. | Ordre : SOS, puis score, puis ancienneté. Les compteurs d'attente avancent chaque seconde ; ⚠ « Attente dépassée » au-delà de 2 min (seuil réglable). |
+| 1:45 | Cliquer **Scénario : Violence**, puis ouvrir l'incident. | Toast + marqueur qui pulse. Détail : image avec **squelette simulé** et visages floutés, score et fenêtres 3/3 avec seuil, mini-carte, incidents proches, historique. |
+| 2:30 | **Prendre en charge**, puis **Clôturer…** : choisir **Fausse alerte**. | La résolution est obligatoire ; elle va dans le journal d'activité et dans les statistiques. |
+| 3:00 | Fenêtre B : **Se connecter en tant qu'utilisateur**, accepter ou refuser le GPS, maintenir **SOS** 1,5 s. | Le SOS ne passe pas par l'IA. Si le GPS est refusé, il part « sans position ». |
+| 3:30 | Regarder la fenêtre A. | Le SOS est **en tête de la file** en moins d'une seconde. **Prendre en charge** : la frise de l'utilisateur passe à « Prise en charge » en direct ; **Clôturer** : message clair à l'utilisateur. |
+| 4:00 | Fenêtre A : **Santé** → **Simuler une panne caméra**. | Caméras, état des services (Simulé), latence du dernier incident vs **objectif** 3 s (« objectif, pas une mesure garantie »). La panne se voit dans la bande d'état, sur la carte et dans le journal. **Rétablir**. |
+| 4:30 | **Statistiques** puis **Mode supervision** (Échap pour quitter). | Carte de chaleur heure × jour, part de fausses alertes (« indicateur opérationnel, pas une métrique du modèle »), aucune prévision. Supervision : plein écran, texte agrandi, son muet par défaut (SOS et violence seulement). |
 
-Hors ligne : installer la PWA (icône d'installation du navigateur) puis couper le réseau ; les pages restent utilisables, seules les tuiles de carte manquent (fond de grille de repli).
+Compléments possibles : page **Détection** (seuil + fenêtres consécutives), **Performance et conformité** (« À mesurer »), export CSV du journal, sélecteur **Vue démo** pour passer d'admin à utilisateur sans déconnexion, pages utilisateur **Alertes / Carte / Vie privée / Contacts** (« Prévu V2 »).
+
+Hors ligne : installer la PWA puis couper le réseau ; l'app utilisateur reste utilisable, seules les tuiles de carte manquent (fond de grille de repli).
