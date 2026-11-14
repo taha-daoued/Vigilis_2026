@@ -1,111 +1,94 @@
+@import 'tailwindcss';
+@import 'leaflet/dist/leaflet.css';
+
+/* ===== Design system Vigilis (voir docs/DESIGN_SYSTEM.md) ===== */
+@theme {
+  --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+  /* Marque */
+  --color-brand-600: #1d4ed8;
+  --color-brand-500: #2563eb;
+  --color-brand-300: #93b4fb;
+
+  /* Types d'incident (jamais seuls : toujours avec forme + libellé) */
+  --color-violence: #dc2626;
+  --color-chute: #d97706;
+  --color-sos: #7c3aed;
+  --color-vol: #0d9488;
+}
+
+/* Jetons sémantiques : clair par défaut (PWA utilisateur), sombre pour la supervision */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --surface-2: #eef1f8;
+  --border: #cbd3e3;
+  --text: #0b1220;
+  --text-muted: #46526b;
+  --focus: #1d4ed8;
+  --ok: #15803d;
+  --warn: #b45309;
+  --danger: #b91c1c;
+}
+.theme-admin {
+  --bg: #0b1220;
+  --surface: #111a2e;
+  --surface-2: #1b2740;
+  --border: #33405c;
+  --text: #e8edf7;
+  --text-muted: #a3b0c8;
+  --focus: #93b4fb;
+  --ok: #4ade80;
+  --warn: #fbbf24;
+  --danger: #f87171;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-ink: var(--text);
+  --color-muted: var(--text-muted);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
 }
 
-body {
-  margin: 0;
-}
+html, body, #root { height: 100%; }
+body { margin: 0; font-family: var(--font-sans); background: var(--bg); color: var(--text); }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
+/* Cibles tactiles >= 44 px */
+.btn { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .5rem 1rem; border-radius: .5rem; font-weight: 600; border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text); cursor: pointer; }
+.btn:hover:not(:disabled) { filter: brightness(1.08); }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.btn-primary { background: var(--color-brand-600); border-color: var(--color-brand-600); color: #fff; }
+.btn-danger { background: #b91c1c; border-color: #b91c1c; color: #fff; }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: .75rem; }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
+/* Marqueurs Leaflet : forme + couleur, pulsation pour le nouveau */
+.vg-marker { display: grid; place-items: center; width: 30px; height: 30px; color: #fff; font-weight: 800; font-size: 13px;
+  border: 2px solid #fff; box-shadow: 0 1px 4px rgb(0 0 0 / .5); }
+.vg-marker.pulse { animation: vg-pulse 1.4s ease-out 3; }
+.vg-cluster { display: grid; place-items: center; border-radius: 9999px; background: #1d4ed8; color: #fff; font-weight: 700;
+  border: 3px solid #fff; box-shadow: 0 1px 4px rgb(0 0 0 / .5); }
+.vg-cam { width: 22px; height: 22px; display: grid; place-items: center; background: #334155; color: #fff; border-radius: 4px;
+  border: 2px solid #cbd5e1; font-size: 11px; }
+.vg-cam.off { background: #64748b; border-style: dashed; }
+@keyframes vg-pulse { 0% { box-shadow: 0 0 0 0 rgb(248 113 113 / .9); } 100% { box-shadow: 0 0 0 22px rgb(248 113 113 / 0); } }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+/* Fond de repli quand les tuiles OSM ne sont pas disponibles (hors ligne) */
+.vg-map { background-color: #1b2740;
+  background-image: linear-gradient(#33405c 1px, transparent 1px), linear-gradient(90deg, #33405c 1px, transparent 1px);
+  background-size: 48px 48px; }
+.leaflet-container { font-family: var(--font-sans); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
 }

@@ -59,3 +59,6 @@ Source : `recap_pfe_detection_risques.pdf` (11/11/2026), adapté à la stack ret
 - Le système détecte tôt, il ne prédit pas.
 - Aucune métrique ne doit être annoncée avant mesure sur le jeu de test verrouillé et les vidéos maison.
 - Aucune vidéo personnelle envoyée à un fournisseur externe sans consentement explicite.
+
+## Note : V1 démo statique livrée
+La V1 démo statique (web/, mock + PWA, sans backend ni IA) est livrée. Le reste du planning est inchangé : FastAPI, Firebase et service IA suivent en V2. Voir README.md et docs/DEMO_SCRIPT.md.
