@@ -12,3 +12,6 @@ serviceAccountKey*.json
 videos/
 .firebase/
 firebase-debug.log
+
+# datasets (jamais dans Git)
+ai/data/
