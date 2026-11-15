@@ -32,17 +32,19 @@ def label_of(path: Path):
 
 def split_files(root: Path, seed: int = SEED):
     """Retourne une liste de (chemin relatif, label, split), triée et reproductible."""
-    by_label = {0: [], 1: []}
+    # Une seule copie par (label, nom de fichier) : le dataset Kaggle contient deux
+    # arborescences identiques, ce qui mettrait la même vidéo en train ET en test.
+    by_label = {0: {}, 1: {}}
     for p in sorted(root.rglob("*")):
         if p.suffix.lower() in VIDEO_EXT:
             lab = label_of(p.relative_to(root))
             if lab is not None:
-                by_label[lab].append(p.relative_to(root).as_posix())
+                by_label[lab].setdefault(p.name.lower(), p.relative_to(root).as_posix())
 
     rows = []
     rng = random.Random(seed)
-    for lab, files in by_label.items():  # découpage par classe : proportions conservées
-        files = sorted(files)
+    for lab, unique in by_label.items():  # découpage par classe : proportions conservées
+        files = sorted(unique.values())
         rng.shuffle(files)
         n_train = int(len(files) * RATIOS[0])
         n_val = int(len(files) * RATIOS[1])

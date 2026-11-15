@@ -31,6 +31,18 @@ def test_every_video_in_exactly_one_split(tmp_path):
     assert len({r[0] for r in rows}) == 40
 
 
+def test_duplicated_folder_tree_is_counted_once(tmp_path):
+    fake_dataset(tmp_path)
+    for cls, prefix in (("Violence", "V"), ("NonViolence", "NV")):  # 2e copie, comme sur Kaggle
+        d = tmp_path / "copie" / "Real Life Violence Dataset" / cls
+        d.mkdir(parents=True)
+        for i in range(20):
+            (d / f"{prefix}_{i}.mp4").touch()
+    rows = split_files(tmp_path)
+    assert len(rows) == 40
+    assert len({r[0].split("/")[-1] for r in rows}) == 40
+
+
 def test_split_is_stratified(tmp_path):
     fake_dataset(tmp_path)
     rows = split_files(tmp_path)
