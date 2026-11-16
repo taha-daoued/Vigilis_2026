@@ -14,6 +14,7 @@ import time
 import cv2
 
 from vigilis_ai.client import Sender, build_fall_body
+from vigilis_ai.clock import FrameClock
 from vigilis_ai.config import ConfigError, load_config
 from vigilis_ai.fall import FallDetector, FallParams, extract_sample
 from vigilis_ai.pose import PoseEstimator, draw
@@ -48,12 +49,16 @@ def main() -> None:
     est = PoseEstimator(args.model)
     detector = FallDetector(FallParams(confirm_s=args.confirm_s)) if args.fall else None
     banner_until = 0.0
+    clock = FrameClock(cap, is_file=not args.source.isdigit())  # fichier : temps de la vidéo ; webcam : temps réel
+    if sender is not None and clock.is_file:
+        print("Attention : la source est un fichier, les chutes qu'il contient seront envoyées comme de vraies alertes.")
 
     times, counts, n = [], [], 0
     while True:
         ok, frame = cap.read()
         if not ok:
             break
+        now = clock.tick()
         t0 = time.perf_counter()
         persons = est.infer(frame)
         times.append((time.perf_counter() - t0) * 1000)
@@ -62,7 +67,6 @@ def main() -> None:
 
         img = None if args.no_window else draw(frame, persons)
         if detector is not None:
-            now = time.monotonic()
             h, w = frame.shape[:2]
             for e in detector.update(persons, now, (w, h)):
                 print(f"CHUTE détectée : personne {e.track_id}, score {e.score}, immobile {e.immobile_s:.0f} s")

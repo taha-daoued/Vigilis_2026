@@ -7,11 +7,11 @@ Pour simuler une chute, utilisez un matelas ou des coussins ; ne vous mettez jam
 """
 import argparse
 import csv
-import time
 from pathlib import Path
 
 import cv2
 
+from vigilis_ai.clock import FrameClock
 from vigilis_ai.pose import PoseEstimator, draw
 
 HEADER = ["t", "w", "h", "track_id"] + [f"k{i}{c}" for i in range(17) for c in "xyc"]
@@ -43,7 +43,7 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     path = out / f"{args.name}.csv"
 
-    start = time.monotonic()
+    clock = FrameClock(cap, is_file=not args.source.isdigit())  # fichier : temps de la vidéo ; webcam : temps réel
     rows = 0
     with open(path, "w", newline="", encoding="utf-8") as fh:
         writer = csv.writer(fh)
@@ -52,7 +52,7 @@ def main() -> None:
             ok, frame = cap.read()
             if not ok:
                 break
-            now = time.monotonic() - start
+            now = clock.tick()
             recording = now >= args.delay
             persons = est.infer(frame)
             if recording:
