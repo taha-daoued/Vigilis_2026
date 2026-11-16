@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pydantic-settings
+firebase-admin
+httpx
+pytest
