@@ -73,8 +73,9 @@ Le projet est en avance sur le backend et l'IA de chute, en retard sur la violen
    (jalon J11), puis la brancher avec un moteur de décision (seuil, fenêtres consécutives, doublons).
 3. WebSocket, notifications FCM, connexion Google dans l'interface, image d'incident (si décidé).
 4. Déployer les règles Firestore et le frontend (avec accord), audit sécurité et vie privée, rapport, vidéo de démo de secours.
-- **Ordre de sacrifice en cas de retard** : vol, second avis VLM, analytics, notifications e-mail. Jamais : SOS, dashboard
-  temps réel, évaluation sur vidéos maison.
+
+**Ordre de sacrifice en cas de retard** : vol, second avis VLM, analytics, notifications e-mail. Jamais : SOS, dashboard
+temps réel, évaluation sur vidéos maison.
 
 ## 8. Risques
 - **Détection de chute** : rappel faible. Atténuation : la présenter comme expérimentale, annoncer les chiffres tels quels.
