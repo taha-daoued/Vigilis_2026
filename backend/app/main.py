@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.auth import CurrentUser, require_user
 from app.config import get_settings
+from app.incidents import router as incidents_router
 from app.sos import router as sos_router
 
 
@@ -27,6 +28,7 @@ def create_app() -> FastAPI:
         return {"uid": user.uid, "email": user.email, "role": user.role}
 
     app.include_router(sos_router)
+    app.include_router(incidents_router)
     return app
 
 

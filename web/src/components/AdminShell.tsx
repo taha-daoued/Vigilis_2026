@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { startSimulator } from '../lib/simulator'
-import { incidentsApi } from '../services'
+import { incidentsApi, isMock } from '../services'
 import { TYPE_LABEL } from '../lib/format'
 import { onIncidentArrival, startDataSync, useData } from '../stores/data'
 import { useSession } from '../stores/session'
@@ -67,7 +67,7 @@ export function AdminShell() {
   }, [push])
 
   // Simulateur : un seul, dans le shell, arrêté proprement à la déconnexion
-  useEffect(() => (simRunning ? startSimulator(() => useData.getState().cameras) : undefined), [simRunning])
+  useEffect(() => (isMock && simRunning ? startSimulator(() => useData.getState().cameras) : undefined), [simRunning])
 
   // Mode supervision : plein écran + texte agrandi ; Échap (sortie du plein écran) quitte le mode
   useEffect(() => {
@@ -117,7 +117,7 @@ export function AdminShell() {
             <TourButton />
             <SoundToggle />
             <button className="btn" onClick={() => { navigate('/admin'); setSupervision(true) }}>Mode supervision</button>
-            <button className="btn" onClick={reset}>Réinitialiser la démo</button>
+            {isMock && <button className="btn" onClick={reset}>Réinitialiser la démo</button>}
             <span className="text-sm text-muted">{user?.name}</span>
             <button className="btn" onClick={() => { logout(); navigate('/') }}>Déconnexion</button>
           </div>

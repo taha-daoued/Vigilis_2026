@@ -8,7 +8,7 @@ import { ResolutionDialog } from '../components/ResolutionDialog'
 import { StatusBar } from '../components/StatusBar'
 import { useNowMinute } from '../lib/useNow'
 import { triggerScenario, type Scenario } from '../lib/simulator'
-import { incidentsApi } from '../services'
+import { incidentsApi, isMock } from '../services'
 import type { Incident, Resolution } from '../services'
 import { onIncidentArrival, useData } from '../stores/data'
 import { useSession } from '../stores/session'
@@ -65,7 +65,7 @@ export function CommandCenter() {
   return (
     <div className="flex h-full min-h-[640px] flex-col">
       {!supervision && <StatusBar incidents={incidents} cameras={cameras} health={health} />}
-      {!supervision && (
+      {!supervision && isMock && (
         <div className="flex flex-wrap items-center gap-2 border-b border-line px-3 py-2" role="group" aria-label="Simulateur d'incidents">
           <span className="text-xs text-muted">Simulateur : {simRunning ? 'en marche (1 incident / 20-40 s)' : 'en pause'}</span>
           <button className="btn !min-h-11" onClick={() => setSimRunning(!simRunning)} aria-pressed={!simRunning}>{simRunning ? 'Pause' : 'Reprendre'}</button>

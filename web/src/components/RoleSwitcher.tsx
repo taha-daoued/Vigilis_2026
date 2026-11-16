@@ -1,5 +1,6 @@
 // Sélecteur de rôle de la démo : change de compte sans déconnexion manuelle. Les gardes de rôles restent appliquées.
 import { useNavigate } from 'react-router-dom'
+import { isMock } from '../services'
 import type { Role } from '../services'
 import { useSession } from '../stores/session'
 import { useUi } from '../stores/ui'
@@ -7,7 +8,7 @@ import { useUi } from '../stores/ui'
 export function RoleSwitcher() {
   const { user, loginAs } = useSession()
   const navigate = useNavigate()
-  if (!user) return null
+  if (!user || !isMock) return null // en mode connecté, le rôle vient du compte : pas de changement de vue
   const go = async (role: Role) => {
     if (role === user.role) return
     await loginAs(role)

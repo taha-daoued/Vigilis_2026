@@ -14,7 +14,17 @@ npm test           # tests (moteur de décision, services mock)
 ```
 Variables (voir `web/.env.example`) : `VITE_DATA_MODE=mock`, `VITE_DEMO_CENTER=lat,lng` (défaut : Lagos).
 
-## Comptes démo
+## Mode connecté (backend FastAPI + Firestore réels)
+Prérequis : `backend/.env` (voir `backend/.env.example`) et la clé de compte de service **hors du dépôt**.
+```bash
+# terminal 1 : backend (http://localhost:8000)
+cd backend && venv\Scripts\python.exe -m uvicorn app.main:app --port 8000
+# terminal 2 : frontend connecté (http://localhost:5173)
+cd web && npm run dev:live
+```
+Connexion avec un vrai compte Firebase (le rôle `admin` est posé avec `python -m scripts.set_role <email> admin`). L'admin voit tous les incidents et peut les prendre en charge ou les clôturer ; l'utilisateur voit les siens. Actualisation toutes les 2,5 s (le WebSocket n'est pas encore fait). Caméras, santé détaillée, simulateur et statistiques de caméra restent vides ou désactivés tant que le service IA n'est pas branché.
+
+## Comptes démo (mode démo uniquement)
 | Rôle | E-mail | Mot de passe |
 |---|---|---|
 | Utilisateur | `user@vigilis.demo` | `demo1234` |

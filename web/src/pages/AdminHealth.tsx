@@ -3,7 +3,7 @@ import { memo } from 'react'
 import { SimulatedBadge } from '../components/badges'
 import { relativeTime, simulatedFrameAge } from '../lib/format'
 import { useNow } from '../lib/useNow'
-import { incidentsApi } from '../services'
+import { incidentsApi, isMock } from '../services'
 import type { Camera, ServiceState } from '../services'
 import { useData } from '../stores/data'
 import { useSession } from '../stores/session'
@@ -71,7 +71,7 @@ export function AdminHealth() {
       <section aria-labelledby="cams">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <h2 id="cams" className="font-bold">Caméras</h2>
-          <div className="ml-auto flex gap-2" role="group" aria-label="Démo : panne caméra">
+          <div className={`ml-auto flex gap-2 ${isMock ? '' : 'hidden'}`} role="group" aria-label="Démo : panne caméra">
             <button className="btn" onClick={() => void outage()}>Simuler une panne caméra</button>
             <button className="btn" onClick={() => void restore()} disabled={!hasOutage} title={hasOutage ? undefined : 'Aucune panne simulée en cours'}>Rétablir</button>
           </div>

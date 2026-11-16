@@ -7,6 +7,10 @@ from typing import Protocol
 class AlertRepository(Protocol):
     def find_recent_new_sos(self, uid: str, since: datetime) -> dict | None: ...
     def create_alert(self, alert: dict, log: dict) -> str: ...
+    def list_alerts(self, uid: str | None, limit: int = 200) -> list[dict]: ...
+    def get_alert(self, alert_id: str) -> dict | None: ...
+    def update_alert(self, alert_id: str, fields: dict, logs: list[dict]) -> None: ...
+    def list_logs(self, limit: int = 500) -> list[dict]: ...
 
 
 class InMemoryRepository:
@@ -25,6 +29,22 @@ class InMemoryRepository:
         self.alerts[aid] = alert
         self.logs.append({**log, "incidentId": aid})
         return aid
+
+
+    def list_alerts(self, uid: str | None, limit: int = 200) -> list[dict]:
+        rows = [{"id": i, **a} for i, a in self.alerts.items() if uid is None or a.get("userId") == uid]
+        return sorted(rows, key=lambda a: a["receivedAt"], reverse=True)[:limit]
+
+    def get_alert(self, alert_id: str) -> dict | None:
+        a = self.alerts.get(alert_id)
+        return {"id": alert_id, **a} if a else None
+
+    def update_alert(self, alert_id: str, fields: dict, logs: list[dict]) -> None:
+        self.alerts[alert_id].update(fields)
+        self.logs.extend({**l, "incidentId": alert_id} for l in logs)
+
+    def list_logs(self, limit: int = 500) -> list[dict]:
+        return sorted(({"id": str(i), **l} for i, l in enumerate(self.logs)), key=lambda l: l["at"], reverse=True)[:limit]
 
 
 class FirestoreRepository:
@@ -63,3 +83,30 @@ class FirestoreRepository:
         batch.set(db.collection("alert_logs").document(), {**log, "incidentId": alert_ref.id})
         batch.commit()
         return alert_ref.id
+
+    def list_alerts(self, uid: str | None, limit: int = 200) -> list[dict]:
+        from google.cloud.firestore_v1.base_query import FieldFilter
+
+        col = self._db().collection("alerts")
+        if uid is None:  # admin : tout, du plus récent au plus ancien (index simple automatique)
+            docs = col.order_by("receivedAt", direction="DESCENDING").limit(limit).stream()
+            return [{"id": d.id, **d.to_dict()} for d in docs]
+        docs = col.where(filter=FieldFilter("userId", "==", uid)).limit(limit).stream()  # tri en Python : pas d'index composite
+        rows = [{"id": d.id, **d.to_dict()} for d in docs]
+        return sorted(rows, key=lambda a: a["receivedAt"], reverse=True)
+
+    def get_alert(self, alert_id: str) -> dict | None:
+        doc = self._db().collection("alerts").document(alert_id).get()
+        return {"id": doc.id, **doc.to_dict()} if doc.exists else None
+
+    def update_alert(self, alert_id: str, fields: dict, logs: list[dict]) -> None:
+        db = self._db()
+        batch = db.batch()
+        batch.update(db.collection("alerts").document(alert_id), fields)
+        for l in logs:
+            batch.set(db.collection("alert_logs").document(), {**l, "incidentId": alert_id})
+        batch.commit()
+
+    def list_logs(self, limit: int = 500) -> list[dict]:
+        docs = self._db().collection("alert_logs").order_by("at", direction="DESCENDING").limit(limit).stream()
+        return [{"id": d.id, **d.to_dict()} for d in docs]

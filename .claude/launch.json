@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "vigilis-api",
+      "runtimeExecutable": "D:\\PFE_FEDI\\Vigilis\\backend\\venv\\Scripts\\python.exe",
+      "runtimeArgs": ["-m", "uvicorn", "app.main:app", "--port", "8000", "--app-dir", "D:\\PFE_FEDI\\Vigilis\\backend"],
+      "port": 8000
+    },
+    {
+      "name": "vigilis-web-live",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:live", "--prefix", "D:\\PFE_FEDI\\Vigilis\\web"],
+      "port": 5173
+    }
+  ]
+}
