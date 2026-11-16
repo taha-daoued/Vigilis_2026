@@ -6,6 +6,7 @@ from typing import Protocol
 
 class AlertRepository(Protocol):
     def find_recent_new_sos(self, uid: str, since: datetime) -> dict | None: ...
+    def find_recent_detection(self, camera_id: str, alert_type: str, since: datetime) -> dict | None: ...
     def create_alert(self, alert: dict, log: dict) -> str: ...
     def list_alerts(self, uid: str | None, limit: int = 200) -> list[dict]: ...
     def get_alert(self, alert_id: str) -> dict | None: ...
@@ -30,6 +31,12 @@ class InMemoryRepository:
         self.logs.append({**log, "incidentId": aid})
         return aid
 
+
+    def find_recent_detection(self, camera_id: str, alert_type: str, since: datetime) -> dict | None:
+        for aid, a in self.alerts.items():
+            if a.get("cameraId") == camera_id and a["type"] == alert_type and a["status"] == "nouveau" and a["receivedAt"] >= since:
+                return {"id": aid, **a}
+        return None
 
     def list_alerts(self, uid: str | None, limit: int = 200) -> list[dict]:
         rows = [{"id": i, **a} for i, a in self.alerts.items() if uid is None or a.get("userId") == uid]
@@ -70,6 +77,18 @@ class FirestoreRepository:
             q = q.where(filter=FieldFilter(field, "==", value))
         q = q.limit(20)
         for doc in q.stream():
+            data = doc.to_dict()
+            if data["receivedAt"] >= since:
+                return {"id": doc.id, **data}
+        return None
+
+    def find_recent_detection(self, camera_id: str, alert_type: str, since: datetime) -> dict | None:
+        from google.cloud.firestore_v1.base_query import FieldFilter
+
+        q = self._db().collection("alerts")
+        for field, value in (("cameraId", camera_id), ("type", alert_type), ("status", "nouveau")):
+            q = q.where(filter=FieldFilter(field, "==", value))
+        for doc in q.limit(20).stream():
             data = doc.to_dict()
             if data["receivedAt"] >= since:
                 return {"id": doc.id, **data}

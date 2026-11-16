@@ -71,3 +71,11 @@ npm run test:rules     # démarre l'émulateur Firestore, lance 14 tests, l'arr�
 - **Serveur** : écrit l'alerte (`type: sos`, `status: nouveau`, `source: app`, `userId` du jeton, heures serveur UTC, sans `score`) et une ligne `alert_logs` (`kind: sos`) dans la même écriture groupée.
 - **Double appui** : si le même utilisateur a déjà un SOS `nouveau` depuis moins de 60 s, la réponse est `200 {"duplicate": true}` avec le même `id` ; aucune alerte supplémentaire.
 - **Réponses** : `201 {"id", "status": "nouveau", "duplicate": false}`, `401` (jeton), `422` (corps invalide).
+
+## Contrat `POST /incidents` (service IA uniquement)
+- **Authentification** : en-tête `X-API-Key` (valeur de `AI_API_KEY` dans `backend/.env`). Un jeton Firebase, même admin, **ne suffit pas** (401). Si la clé n'est pas configurée, la route répond 503.
+- **Corps** : `{ "type": "violence"|"chute"|"vol", "score": 0-1, "position": {lat,lng} (position de la caméra), "cameraId": "cam-1" (lettres, chiffres, _ . -, ≤ 64), "description": string (1-300), "windowsConfirmed": entier 1-1000, "detectedAt": ISO 8601 (facultatif) }`. Tout autre champ est refusé (422). Le type `sos` est refusé : il passe par `POST /sos`.
+- **Serveur** : `source: camera`, `status: nouveau`, `receivedAt` = heure du serveur. `createdAt` = `detectedAt` s'il est plausible (pas dans le futur de plus de 5 s, pas plus vieux que 10 min), sinon l'heure du serveur. `vol` reçoit `experimental: true`. Une ligne `alert_logs` (`kind: detection`, `actor: service-ia`) est écrite avec l'alerte.
+- **Doublons** : même `cameraId` et même `type` avec une alerte `nouveau` de moins de 30 s → `200 {"duplicate": true}` avec le même `id`.
+- **Réponses** : `201 {"id","status","duplicate":false}`, `200` (doublon), `401`, `422`, `503`.
+- Pas d'image : `imageUrl` reste un repère (`svg:<type>:0`) tant que le stockage n'est pas décidé.
