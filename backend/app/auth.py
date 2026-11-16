@@ -23,18 +23,15 @@ class TokenVerifier(Protocol):
 class FirebaseVerifier:
     """Vérifie un vrai ID token Firebase (nécessite l'accès réseau aux clés publiques de Google)."""
 
-    def __init__(self, project_id: str):
-        self.project_id = project_id
-        self._ready = False
+    def __init__(self, settings: Settings):
+        self.settings = settings
 
     def verify(self, token: str) -> dict:
-        import firebase_admin
         from firebase_admin import auth
 
-        if not self._ready:  # initialisation paresseuse : pas de Firebase au démarrage des tests
-            if not firebase_admin._apps:
-                firebase_admin.initialize_app(options={"projectId": self.project_id})
-            self._ready = True
+        from app.firebase_app import init_firebase
+
+        init_firebase(self.settings)  # paresseux : pas de Firebase au démarrage des tests
         return auth.verify_id_token(token)
 
 
@@ -46,7 +43,7 @@ class CurrentUser:
 
 
 def get_verifier(settings: Settings = Depends(get_settings)) -> TokenVerifier:
-    return FirebaseVerifier(settings.firebase_project_id)
+    return FirebaseVerifier(settings)
 
 
 def current_user(

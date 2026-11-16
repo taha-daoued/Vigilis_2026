@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     allowed_origins: str = "http://localhost:5173"
     # Clé partagée avec le service IA. Vide = les routes du service IA sont désactivées.
     ai_api_key: str = ""
+    # Chemin du fichier de compte de service (hors du dépôt). Vide = identifiants par défaut de Google.
+    google_application_credentials: str = ""
 
     @property
     def origins(self) -> list[str]:
