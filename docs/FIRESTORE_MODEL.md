@@ -63,3 +63,11 @@ npm run test:rules     # démarre l'émulateur Firestore, lance 14 tests, l'arr�
 - Port de l'émulateur : **8085** (8080 est pris par Apache sur le PC de développement).
 - **Windows** : si Java échoue avec « Unable to establish loopback connection », définir un dossier temporaire court avant la commande (`TEMP=C:\tmpjava`, `TMP=C:\tmpjava`, `JAVA_TOOL_OPTIONS=-Djava.io.tmpdir=C:\tmpjava`).
 - Contrôle effectué : avec une règle volontairement trop permissive sur `alerts`, 6 tests sur 14 échouent ; les règles ont ensuite été restaurées.
+
+## Contrat `POST /sos`
+- **Authentification** : `Authorization: Bearer <ID token Firebase>` (tout utilisateur connecté).
+- **Corps** : `{ "position": {"lat": number, "lng": number} | null, "positionSource": string (≤ 40 car., défaut "GPS") }`. Corps vide accepté (= « sans position »). Tout autre champ est refusé (422) : le client ne choisit ni `userId`, ni `status`, ni les dates.
+- **Validation** : lat entre -90 et 90, lng entre -180 et 180.
+- **Serveur** : écrit l'alerte (`type: sos`, `status: nouveau`, `source: app`, `userId` du jeton, heures serveur UTC, sans `score`) et une ligne `alert_logs` (`kind: sos`) dans la même écriture groupée.
+- **Double appui** : si le même utilisateur a déjà un SOS `nouveau` depuis moins de 60 s, la réponse est `200 {"duplicate": true}` avec le même `id` ; aucune alerte supplémentaire.
+- **Réponses** : `201 {"id", "status": "nouveau", "duplicate": false}`, `401` (jeton), `422` (corps invalide).

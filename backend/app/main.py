@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.auth import CurrentUser, require_user
 from app.config import get_settings
+from app.sos import router as sos_router
 
 
 def create_app() -> FastAPI:
@@ -25,6 +26,7 @@ def create_app() -> FastAPI:
         """Renvoie l'identité vérifiée : le frontend s'en sert pour connaître son rôle."""
         return {"uid": user.uid, "email": user.email, "role": user.role}
 
+    app.include_router(sos_router)
     return app
 
 
