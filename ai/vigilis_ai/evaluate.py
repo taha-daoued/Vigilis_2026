@@ -20,7 +20,7 @@ from pathlib import Path
 import cv2
 
 from vigilis_ai.clock import FrameClock
-from vigilis_ai.fall import FallDetector, FallParams, extract_sample
+from vigilis_ai.fall import FallDetector, FallParams, extract_sample, tuned_params
 from vigilis_ai.record import HEADER, point_cells
 from vigilis_ai.replay import load
 
@@ -53,10 +53,16 @@ def judge(expected: str, n_alerts: int) -> str:
     return "OK" if n_alerts == 0 else "FAUSSE ALERTE"
 
 
+def _has_box(cache: Path) -> bool:
+    """Les anciens caches (sans cadre de la personne) sont recalculés."""
+    with open(cache, encoding="utf-8") as fh:
+        return "bx1" in fh.readline()
+
+
 def extract(video: Path, make_estimator, cache_dir: Path, max_fps: float = 10.0, force: bool = False):
     """Points du corps de la vidéo (calculés une fois, puis lus dans le cache). Renvoie (images, taille)."""
     cache = cache_dir / f"{video.stem}.csv"
-    if cache.exists() and not force and cache.stat().st_mtime >= video.stat().st_mtime:
+    if cache.exists() and not force and cache.stat().st_mtime >= video.stat().st_mtime and _has_box(cache):
         return load(str(cache))
     cap = cv2.VideoCapture(str(video))
     if not cap.isOpened():
@@ -112,6 +118,7 @@ def main() -> None:
     ap.add_argument("--model", default="models/yolo26n-pose.pt")
     ap.add_argument("--confirm-s", type=float, default=None)
     ap.add_argument("--min-drop", type=float, default=None)
+    ap.add_argument("--tuned", action="store_true", help="réglages figés sur GMDCSA24 (fall.TUNED) au lieu des valeurs par défaut")
     ap.add_argument("--force", action="store_true", help="recalcule la pose même si le cache existe")
     ap.add_argument("--csv-out", default=None, help="écrit aussi les résultats dans ce fichier CSV")
     args = ap.parse_args()
@@ -121,7 +128,7 @@ def main() -> None:
     if not videos:
         raise SystemExit(f"Aucune vidéo dans {folder}")
     manifest = load_manifest(folder)
-    prm = FallParams()
+    prm = tuned_params() if args.tuned else FallParams()
     if args.confirm_s is not None:
         prm = replace(prm, confirm_s=args.confirm_s)
     if args.min_drop is not None:

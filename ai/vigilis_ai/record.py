@@ -14,15 +14,15 @@ import cv2
 from vigilis_ai.clock import FrameClock
 from vigilis_ai.pose import PoseEstimator, draw
 
-HEADER = ["t", "w", "h", "track_id"] + [f"k{i}{c}" for i in range(17) for c in "xyc"]
+HEADER = ["t", "w", "h", "track_id"] + [f"k{i}{c}" for i in range(17) for c in "xyc"] + ["bx1", "by1", "bx2", "by2"]
 
 
 def point_cells(p) -> list:
-    """x, y, confiance de chacun des 17 points, arrondis."""
+    """x, y, confiance de chacun des 17 points, puis le cadre de la personne (x1, y1, x2, y2), arrondis."""
     cells = []
     for k in range(17):
         cells += [round(float(p.keypoints[k][0]), 1), round(float(p.keypoints[k][1]), 1), round(float(p.conf[k]), 3)]
-    return cells
+    return cells + [round(float(v), 1) for v in p.box]
 
 
 def main() -> None:

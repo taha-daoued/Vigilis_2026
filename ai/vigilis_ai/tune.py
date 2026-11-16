@@ -24,6 +24,16 @@ GRID = {
 }
 
 
+# Seuils du cadre de la personne ; le tronc garde les meilleurs réglages trouvés sur le jeu de réglage (étape précédente).
+BOX_GRID = {
+    "box_upright_max_aspect": [0.8, 1.0],
+    "box_lying_min_aspect": [1.0, 1.2, 1.5],
+    "box_height_ratio_max": [0.8, 0.7, 0.55],
+    "box_drop_min": [0.1, 0.2, 0.3],
+}
+TORSO_BEST = {"min_drop_torso": 0.6, "lying_min_deg": 50.0, "still_lying_min_deg": 40.0, "still_range_torso": 1.0}
+
+
 def run_grid(videos: dict[str, tuple], expected: dict[str, str], base: FallParams, grid: dict[str, list]) -> list[dict]:
     """videos : nom -> (images, taille). Renvoie une ligne par combinaison, avec les comptes."""
     keys = list(grid)
@@ -51,7 +61,10 @@ def main() -> None:
     ap.add_argument("folder")
     ap.add_argument("--confirm-s", type=float, default=10.0)
     ap.add_argument("--top", type=int, default=12)
+    ap.add_argument("--preset", choices=["torso", "box"], default="torso", help="seuils du tronc ou du cadre de la personne")
     args = ap.parse_args()
+    grid = GRID if args.preset == "torso" else BOX_GRID
+    base = FallParams(confirm_s=args.confirm_s, **({} if args.preset == "torso" else TORSO_BEST))
     folder = Path(args.folder)
     manifest = load_manifest(folder)
     videos, expected = {}, {}
@@ -60,9 +73,9 @@ def main() -> None:
         if not cache.exists():
             raise SystemExit(f"Pas de cache pour {v.name} : lancez d'abord vigilis_ai.evaluate sur ce dossier.")
         videos[v.name], expected[v.name] = load(str(cache)), expected_for(v.stem, manifest)
-    rows = run_grid(videos, expected, FallParams(confirm_s=args.confirm_s), GRID)
+    rows = run_grid(videos, expected, base, grid)
     rows.sort(key=lambda r: (r["false_alarms"], -r["caught"]))  # peu de fausses alertes d'abord, puis le plus de chutes
-    keys = list(GRID)
+    keys = list(grid)
     print(f"{len(rows)} combinaisons, immobilité {args.confirm_s:.0f} s, {rows[0]['n_pos']} chutes et {rows[0]['n_neg']} vidéos normales")
     print("  ".join(f"{k[:12]:>12}" for k in keys), "  chutes  fausses alertes")
     for r in rows[: args.top]:

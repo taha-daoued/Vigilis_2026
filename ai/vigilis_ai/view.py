@@ -16,7 +16,7 @@ import cv2
 from vigilis_ai.client import Sender, build_fall_body
 from vigilis_ai.clock import FrameClock
 from vigilis_ai.config import ConfigError, load_config
-from vigilis_ai.fall import FallDetector, FallParams, extract_sample
+from vigilis_ai.fall import FallDetector, FallParams, extract_sample, tuned_params
 from vigilis_ai.pose import PoseEstimator, draw
 
 
@@ -28,6 +28,7 @@ def main() -> None:
     ap.add_argument("--no-window", action="store_true", help="pas de fenêtre : affiche seulement les mesures")
     ap.add_argument("--fall", action="store_true", help="active les règles de chute (affiche CHUTE et l'état du corps)")
     ap.add_argument("--confirm-s", type=float, default=10.0, help="immobilité exigée avant l'alerte (secondes)")
+    ap.add_argument("--tuned", action="store_true", help="réglages figés sur GMDCSA24 (fall.TUNED), non validés sur vos vidéos")
     ap.add_argument("--send", action="store_true", help="envoie les chutes au backend (POST /incidents) ; exige --fall et ai/.env")
     args = ap.parse_args()
     if args.send and not args.fall:
@@ -47,7 +48,8 @@ def main() -> None:
     if not cap.isOpened():
         raise SystemExit(f"Impossible d'ouvrir la source : {args.source}")
     est = PoseEstimator(args.model)
-    detector = FallDetector(FallParams(confirm_s=args.confirm_s)) if args.fall else None
+    make = tuned_params if args.tuned else FallParams
+    detector = FallDetector(make(confirm_s=args.confirm_s)) if args.fall else None
     banner_until = 0.0
     clock = FrameClock(cap, is_file=not args.source.isdigit())  # fichier : temps de la vidéo ; webcam : temps réel
     if sender is not None and clock.is_file:

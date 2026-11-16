@@ -23,7 +23,9 @@ def load(path: str):
             kp = np.array([[float(r[f"k{i}x"]), float(r[f"k{i}y"])] for i in range(17)])
             conf = np.array([float(r[f"k{i}c"]) for i in range(17)])
             tid = int(r["track_id"]) if r["track_id"] != "" else None
-            by_t[float(r["t"])].append(Person(tid, kp, conf, (0, 0, 0, 0)))
+            # anciens enregistrements sans cadre : (0, 0, 0, 0), la règle du cadre les ignore
+            box = tuple(float(r[k]) for k in ("bx1", "by1", "bx2", "by2")) if "bx1" in r else (0.0, 0.0, 0.0, 0.0)
+            by_t[float(r["t"])].append(Person(tid, kp, conf, box))
     return sorted(by_t.items()), size
 
 
