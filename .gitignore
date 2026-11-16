@@ -15,3 +15,7 @@ firebase-debug.log
 
 # datasets (jamais dans Git)
 ai/data/
+
+# poids de modèles (trop gros, jamais dans Git)
+ai/models/
+*.pt
