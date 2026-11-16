@@ -1,0 +1,40 @@
+rules_version = '2';
+
+// Règles Vigilis. Principe : le navigateur ne peut QUE lire, selon son rôle.
+// Toute écriture passe par FastAPI (firebase-admin), qui contourne ces règles après avoir
+// vérifié l'ID token. Le rôle vient du custom claim « role » posé côté serveur.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() && request.auth.token.role == 'admin';
+    }
+
+    // Profil : chacun lit le sien, l'admin lit tous les profils.
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if false;
+    }
+
+    // Alertes : un utilisateur ne voit que celles qu'il a émises (SOS) ; l'admin voit tout.
+    match /alerts/{alertId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+      allow write: if false;
+    }
+
+    // Journal d'audit : réservé à l'admin.
+    match /alert_logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Tout le reste est interdit par défaut.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

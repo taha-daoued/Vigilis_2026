@@ -53,3 +53,13 @@ Trois collections : `users`, `alerts`, `alert_logs`. Les champs reprennent exact
 ## Vie privée
 - Ne pas écrire de position ni d'image dans les logs applicatifs.
 - Durée de conservation à définir (le frontend affiche une valeur indicative).
+
+## Tester les règles
+```bash
+cd web
+npm run test:rules     # démarre l'émulateur Firestore, lance 14 tests, l'arrête
+```
+- Prérequis : Java (testé avec 23) et `firebase-tools`. Au premier lancement, l'émulateur (`.jar`, ~136 Mo) est téléchargé dans `~/.cache/firebase/emulators`.
+- Port de l'émulateur : **8085** (8080 est pris par Apache sur le PC de développement).
+- **Windows** : si Java échoue avec « Unable to establish loopback connection », définir un dossier temporaire court avant la commande (`TEMP=C:\tmpjava`, `TMP=C:\tmpjava`, `JAVA_TOOL_OPTIONS=-Djava.io.tmpdir=C:\tmpjava`).
+- Contrôle effectué : avec une règle volontairement trop permissive sur `alerts`, 6 tests sur 14 échouent ; les règles ont ensuite été restaurées.

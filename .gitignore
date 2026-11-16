@@ -19,3 +19,8 @@ ai/data/
 # poids de modèles (trop gros, jamais dans Git)
 ai/models/
 *.pt
+
+# journaux des Ã©mulateurs Firebase
+firestore-debug.log
+ui-debug.log
+rules-run.log
