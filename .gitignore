@@ -24,3 +24,6 @@ ai/models/
 firestore-debug.log
 ui-debug.log
 rules-run.log
+
+# .env.http : mode et URL locale seulement, aucun secret
+!web/.env.http
