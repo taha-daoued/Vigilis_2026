@@ -24,6 +24,17 @@ cd web && npm run dev:live
 ```
 Connexion avec un vrai compte Firebase (le rôle `admin` est posé avec `python -m scripts.set_role <email> admin`). L'admin voit tous les incidents et peut les prendre en charge ou les clôturer ; l'utilisateur voit les siens. Actualisation toutes les 2,5 s (le WebSocket n'est pas encore fait). Caméras, santé détaillée, simulateur et statistiques de caméra restent vides ou désactivés tant que le service IA n'est pas branché.
 
+## Service IA (détection de chute par webcam)
+Prérequis : `ai/.env` (voir `ai/.env.example`, clé = `AI_API_KEY` de `backend/.env`) et le modèle `ai/models/yolo26n-pose.pt` (non versionné).
+```bash
+cd ai
+venv\Scripts\python.exe -m vigilis_ai.view --source 0 --fall --confirm-s 5          # voir la détection en direct
+venv\Scripts\python.exe -m vigilis_ai.view --source 0 --fall --send --confirm-s 5   # et envoyer les chutes au backend
+venv\Scripts\python.exe -m vigilis_ai.record --name chute_1 --seconds 40            # enregistrer les POINTS du corps (jamais d'image)
+venv\Scripts\python.exe -m vigilis_ai.replay data\pose_records\chute_1.csv          # rejouer avec d'autres seuils
+```
+Webcam à 2-3 m (corps entier visible). Seuils de chute = points de départ, **non validés** ; violence : modèle entraîné mais pas encore branché. Voir `docs/PLANNING.md`.
+
 ## Comptes démo (mode démo uniquement)
 | Rôle | E-mail | Mot de passe |
 |---|---|---|

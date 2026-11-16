@@ -3,14 +3,18 @@
 Exemples (depuis le dossier ai/) :
   python -m vigilis_ai.view --source 0                    # webcam, touche q pour quitter
   python -m vigilis_ai.view --source 0 --fall --confirm-s 5   # avec détection de chute (alerte après 5 s d'immobilité)
+  python -m vigilis_ai.view --source 0 --fall --send          # et envoi des chutes au backend (ai/.env requis)
   python -m vigilis_ai.view --source video.mp4 --no-window --max-frames 60   # mesure sans fenêtre
 Rien n'est enregistré ni envoyé : les images restent en mémoire.
 """
 import argparse
+import logging
 import time
 
 import cv2
 
+from vigilis_ai.client import Sender, build_fall_body
+from vigilis_ai.config import ConfigError, load_config
 from vigilis_ai.fall import FallDetector, FallParams, extract_sample
 from vigilis_ai.pose import PoseEstimator, draw
 
@@ -23,7 +27,20 @@ def main() -> None:
     ap.add_argument("--no-window", action="store_true", help="pas de fenêtre : affiche seulement les mesures")
     ap.add_argument("--fall", action="store_true", help="active les règles de chute (affiche CHUTE et l'état du corps)")
     ap.add_argument("--confirm-s", type=float, default=10.0, help="immobilité exigée avant l'alerte (secondes)")
+    ap.add_argument("--send", action="store_true", help="envoie les chutes au backend (POST /incidents) ; exige --fall et ai/.env")
     args = ap.parse_args()
+    if args.send and not args.fall:
+        raise SystemExit("--send exige --fall : sans règles de chute, rien à envoyer.")
+
+    sender = cfg = None
+    if args.send:
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
+        try:
+            cfg = load_config()
+        except ConfigError as e:
+            raise SystemExit(str(e)) from None
+        sender = Sender(cfg)
+        print(f"Envoi activé vers {cfg.api_url} (caméra {cfg.camera_id}).")
 
     cap = cv2.VideoCapture(int(args.source) if args.source.isdigit() else args.source)
     if not cap.isOpened():
@@ -50,6 +67,8 @@ def main() -> None:
             for e in detector.update(persons, now, (w, h)):
                 print(f"CHUTE détectée : personne {e.track_id}, score {e.score}, immobile {e.immobile_s:.0f} s")
                 banner_until = now + 6
+                if sender is not None:
+                    sender.submit(build_fall_body(e, cfg))
             if img is not None:
                 seen = bool(persons) and extract_sample(persons[0], now, (w, h), detector.prm) is not None
                 cv2.putText(img, "corps visible" if seen else "corps incomplet : pas de jugement", (10, h - 12),
@@ -64,6 +83,9 @@ def main() -> None:
             break
     cap.release()
     cv2.destroyAllWindows()
+    if sender is not None:
+        sender.close()
+        print(f"Envois : {sender.sent} réussi(s), {sender.failed} échoué(s).")
     if times:
         steady = times[1:] or times  # la 1re image inclut le chargement du modèle
         print(f"{n} images | pose : {sum(steady) / len(steady):.0f} ms/image en moyenne "
