@@ -85,6 +85,6 @@ web/src/stores     session, données, toasts (Zustand)
 web/src/pages      Home, Login, CommandCenter, AdminHealth, AdminStats, AdminAudit, AdminDetection, AdminEvaluation, UserHome, UserAlerts, UserMap, UserPrivacy, UserContacts
 web/src/components carte, liste, détail, badges, shells
 web/src/lib        seeds, simulateur, moteur de décision, utilitaires
-docs/              PLANNING.md, DESIGN_SYSTEM.md, DEMO_SCRIPT.md
+docs/              PLANNING.md, DOCUMENTATION.md, COMPTE_RENDU.md, EVALUATION_CHUTE.md, FIRESTORE_MODEL.md, DESIGN_SYSTEM.md, DEMO_SCRIPT.md
 ai/                (venv Python, service IA à venir)
 ```
