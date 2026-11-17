@@ -14,6 +14,7 @@ import httpx
 
 from vigilis_ai.config import Config
 from vigilis_ai.fall import FallEvent
+from vigilis_ai.violence import ViolenceEvent
 
 log = logging.getLogger("vigilis_ai.client")
 RETRY_STATUS = {408, 429}  # en plus des 5xx
@@ -31,6 +32,19 @@ def build_fall_body(event: FallEvent, cfg: Config, now: datetime | None = None) 
         "description": f"Chute détectée par les règles de pose : personne allongée et immobile depuis {int(event.immobile_s)} s.",
         "windowsConfirmed": max(1, event.windows_confirmed),
         "detectedAt": fell_at.isoformat().replace("+00:00", "Z"),
+    }
+
+
+def build_violence_body(event: ViolenceEvent, cfg: Config) -> dict:
+    """Corps de POST /incidents pour une violence (le score est la moyenne des fenêtres confirmées)."""
+    return {
+        "type": "violence",
+        "score": event.score,
+        "position": {"lat": cfg.camera_lat, "lng": cfg.camera_lng},
+        "cameraId": cfg.camera_id,
+        "description": (f"Violence détectée par le modèle vidéo : {event.windows_confirmed} fenêtres consécutives "
+                        f"au-dessus du seuil (probabilité moyenne {event.score:.2f}). À vérifier par un opérateur."),
+        "windowsConfirmed": max(1, event.windows_confirmed),
     }
 
 

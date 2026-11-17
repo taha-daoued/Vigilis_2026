@@ -1,7 +1,7 @@
 """Fine-tuning de VideoMAE (base, Kinetics-400) pour violence / pas de violence.
 
 À exécuter dans le notebook Kaggle (GPU + Internet activés). Ce script n'utilise QUE les
-ensembles train et val : le test reste intact (voir evaluate_test.py, à lancer une seule fois).
+ensembles train et val : le test reste intact (voir eval_violence_testset.py, à lancer une seule fois).
 Copier clips.py dans le notebook (ou coller son contenu avant ce script).
 """
 import csv

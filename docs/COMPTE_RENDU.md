@@ -12,8 +12,9 @@ https://github.com/taha-daoued/Vigilis_2026. Documentation technique : `docs/DOC
   par l'admin. C'est **un seul essai, dans un cas facile** (vue de face, corps entier visible) : à répéter.
 - La **détection de chute est mesurée sur un jeu public** : résultat modeste (4 chutes sur 17, 1 fausse alerte sur 20 sur
   le jeu mis de côté). Je la présente comme **expérimentale**.
-- Le **modèle de violence est évalué sur le test verrouillé (F1 0,984 contre 0,748 pour une baseline de mouvement), mais pas
-  encore branché** sur un flux caméra : c'est le principal écart restant au planning. Il est lent sur CPU (7,1 s par clip).
+- Le **modèle de violence est évalué sur le test verrouillé (F1 0,984 contre 0,748 pour une baseline de mouvement) et branché
+  sur la caméra** (option `--violence`, alerte après 2 fenêtres consécutives). Vérifié sur un montage de clips RLVS, **pas
+  encore testé en direct sur webcam**. Il est lent sur CPU (7,1 s par clip) et ralentit la pose quand les deux tournent.
 - Aucune évaluation sur des vidéos filmées par l'équipe à ce jour.
 
 ## 2. Ce qui a été réalisé
@@ -51,7 +52,7 @@ une descente trop faible. Ce sont les limites de règles simples sur pose 2D.
 | J9 | `GET /incidents`, WebSocket | `GET` fait ; **WebSocket non fait** (actualisation toutes les 2,5 s) |
 | J10 | Carte, détail, `PATCH` du statut et audit | Fait |
 | J11 | **Jalon : violence comparée à une baseline** | **Fait** (VideoMAE 0,984 contre baseline 0,748 de F1) |
-| J12 | Intégration violence et chute, moteur de décision | Chute : fait ; **violence : évaluée, pas encore branchée** |
+| J12 | Intégration violence et chute, moteur de décision | Chute : fait ; **violence : branchée (fenêtres glissantes, 2 fenêtres consécutives), vérifiée sur un montage RLVS, pas encore testée en direct** |
 | J13 | **Jalon : chaîne caméra, IA, FastAPI, Firestore, dashboard** | Fait pour la chute ; **validé en direct sur un essai (17/11)**, à répéter ; violence absente |
 
 Le projet est en avance sur le backend et l'IA de chute ; la violence est évaluée et comparée, il reste à la brancher.
@@ -74,9 +75,9 @@ Le projet est en avance sur le backend et l'IA de chute ; la violence est évalu
 ## 7. Reste à faire (priorité décroissante)
 1. **Répéter la chaîne en direct** avec la webcam (chute franche, couché lent, assis vite, marche ; noter les réussites)
    et filmer des vidéos maison avec consentement pour l'évaluation.
-2. **Violence** : la brancher sur un flux caméra avec un moteur de décision (fenêtres glissantes, seuil, fenêtres
-   consécutives, doublons), décider du repli vers un modèle plus léger si 7 s par clip est trop lent, et la tester sur
-   des scènes jouées (sans contact réel) pour mesurer les fausses alertes hors RLVS.
+2. **Violence** : la tester en direct sur webcam avec des scènes jouées (sans contact réel) pour mesurer les fausses
+   alertes hors RLVS, et décider du repli vers un modèle plus léger si la lenteur (7 s par clip, pose ralentie à
+   420-530 ms par image quand les deux tournent) est trop gênante.
 3. WebSocket, notifications FCM, connexion Google dans l'interface, image d'incident (si décidé).
 4. Déployer les règles Firestore et le frontend (avec accord), audit sécurité et vie privée, rapport, vidéo de démo de secours.
 

@@ -8,7 +8,7 @@
 - **Données** : RLVS, 2 000 vidéos après retrait des doublons, découpage figé 1 400 / 300 / 300 (graine 2026).
   Le jeu de test (300 vidéos : 150 violentes, 150 non violentes) n'a jamais servi à l'entraînement ni au choix du modèle.
 - **Seuil** : 0,5, fixé avant la mesure.
-- **Mesure** : `ai/violence/evaluate_test.py`, une fois (fichier-témoin `data/rlvs/test_done.json`).
+- **Mesure** : `ai/violence/eval_violence_testset.py`, une fois (fichier-témoin `data/rlvs/test_done.json`).
   Un premier lancement a planté sur 13 fichiers `.avi` ignorés par le script, **avant tout résultat** ; filtre corrigé, puis relancé.
 
 ## Résultats (test, 300 vidéos)
@@ -50,5 +50,5 @@ est quasi instantanée, mais elle confond fortement « beaucoup de mouvement » 
 ```bash
 cd ai
 venv\Scripts\python.exe violence\benchmark_speed.py models\videomae_best.pt
-venv\Scripts\python.exe violence\evaluate_test.py models\videomae_best.pt data\rlvs\real-life-violence-situations-dataset.zip
+venv\Scripts\python.exe violence\eval_violence_testset.py models\videomae_best.pt data\rlvs\real-life-violence-situations-dataset.zip
 ```

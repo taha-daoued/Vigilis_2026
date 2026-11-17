@@ -30,12 +30,13 @@ Prérequis : `ai/.env` (voir `ai/.env.example`, clé = `AI_API_KEY` de `backend/
 cd ai
 venv\Scripts\python.exe -m vigilis_ai.view --source 0 --fall --confirm-s 5          # voir la détection en direct
 venv\Scripts\python.exe -m vigilis_ai.view --source 0 --fall --send --confirm-s 5   # et envoyer les chutes au backend
+venv\Scripts\python.exe -m vigilis_ai.view --source 0 --fall --violence --send --confirm-s 5   # chute + violence (modèle ai/models/videomae_best.pt, non versionné)
 venv\Scripts\python.exe -m vigilis_ai.record --name chute_1 --seconds 40            # enregistrer les POINTS du corps (jamais d'image)
 venv\Scripts\python.exe -m vigilis_ai.replay data\pose_records\chute_1.csv          # rejouer avec d'autres seuils
 venv\Scripts\python.exe -m vigilis_ai.evaluate data\videos --csv-out data\resultats.csv   # évaluer un dossier de vidéos
 ```
 Évaluation : mettez vos vidéos dans `ai/data/videos/` ; le résultat attendu vient du nom (`chute_immobile_*` ou `alerte_*` = alerte attendue, tout le reste = aucune) ou d'un `labels.csv` (`file,expected`). Le tableau donne chutes détectées, fausses alertes et chutes manquées ; la pose est mise en cache (changer un seuil prend quelques secondes). Ne mettez pas `--send` avec des fichiers.
-Webcam à 2-3 m (corps entier visible). Seuils de chute = points de départ, **non validés** ; violence : modèle entraîné mais pas encore branché. Voir `docs/PLANNING.md`.
+Webcam à 2-3 m (corps entier visible). Seuils de chute = points de départ, **non validés** ; violence : modèle VideoMAE (`--violence`, environ 7 s par fenêtre sur CPU, 2 fenêtres consécutives avant l'alerte), évalué sur RLVS seulement (`docs/EVALUATION_VIOLENCE.md`). Voir `docs/PLANNING.md`.
 
 ## Comptes démo (mode démo uniquement)
 | Rôle | E-mail | Mot de passe |

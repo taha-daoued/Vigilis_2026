@@ -5,7 +5,7 @@ Un fichier-témoin (data/rlvs/test_done.json) empêche de relancer par erreur ; 
 (à ne faire que pour un bug technique, et à dire dans le rapport).
 `--split val` sert à vérifier que le script marche (la validation a déjà servi à choisir le modèle).
 
-Usage : python violence/evaluate_test.py models/videomae_best.pt data/rlvs/real-life-violence-situations-dataset.zip
+Usage : python violence/eval_violence_testset.py models/videomae_best.pt data/rlvs/real-life-violence-situations-dataset.zip
 """
 import argparse
 import csv

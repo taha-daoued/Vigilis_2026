@@ -106,8 +106,12 @@ Python, OpenCV, Ultralytics (YOLO26-pose), PyTorch. Modèle : `ai/models/yolo26n
   `evaluate.py` (évaluation d'un dossier de vidéos), `tune.py` (balayage de seuils), `prepare_gmdcsa24.py`.
 - **Violence** (`ai/violence/`) : jeu RLVS découpé de façon figée (graine 2026 : 1 400 / 300 / 300, doublons du dataset
   retirés), VideoMAE-base (Kinetics-400) affiné sur Kaggle (script `train_videomae.py`, journaux dans le notebook). Le
-  modèle est entraîné et évalué (`infer.py`, `benchmark_speed.py`, `evaluate_test.py`, baseline `baseline.py`, voir
-  `docs/EVALUATION_VIOLENCE.md`) mais **pas encore branché** sur un flux caméra.
+  modèle est entraîné et évalué (`infer.py`, `benchmark_speed.py`, `eval_violence_testset.py`, baseline `baseline.py`, voir
+  `docs/EVALUATION_VIOLENCE.md`) et **branché sur la caméra** (`vigilis_ai/violence.py`, option `--violence` de `view.py`) :
+  les 16 images des 5 dernières secondes sont données au modèle dans un fil à part (environ 7 s par fenêtre sur CPU) ;
+  l'alerte n'est envoyée qu'après **2 fenêtres consécutives** au-dessus du seuil 0,5, puis 60 s d'attente. Vérifié sur un
+  montage de clips de validation RLVS (alerte sur le montage violent, aucune sur le normal) ; **pas encore testé en
+  direct sur webcam**. Lancé avec la pose, le traitement d'une image passe d'environ 150 ms à 420-530 ms (CPU partagé).
 
 ## 6. Installation et lancement
 Prérequis : Node 24, Python 3.13, Java (tests de règles), `firebase-tools`. Secrets hors du dépôt :
@@ -152,8 +156,8 @@ Sous Windows, l'émulateur Firestore demande un dossier temporaire court pour Ja
 - Rappel faible de la détection de chute sur ce jeu (voir plus haut) ; une chute dans l'axe de la caméra ou sans
   immobilité n'est pas vue ; une personne qui fait des pompes de côté peut déclencher une fausse alerte.
 - Le score d'une alerte est un indicateur des règles, pas une probabilité.
-- Violence : non évaluée sur des vidéos réalistes ou maison ; pas de temps réel sur CPU (7,1 s par clip) ; pas branchée
-  sur un flux caméra.
+- Violence : non évaluée sur des vidéos réalistes ou maison ; pas de temps réel sur CPU (7,1 s par clip) ; branchée mais non testée en
+  direct sur webcam ; la pose et la violence ensemble ralentissent le traitement (CPU partagé).
 - Pas de WebSocket (actualisation toutes les 2,5 s), pas de notifications FCM/e-mail, connexion Google non branchée
   dans l'interface, pas d'image d'incident (stockage non décidé), préférences de confidentialité gardées dans le
   navigateur, règles Firestore non déployées.

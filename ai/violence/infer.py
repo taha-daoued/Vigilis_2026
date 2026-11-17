@@ -1,34 +1,18 @@
-"""Chargement du modèle VideoMAE affiné et prédiction sur un clip (CPU ou GPU).
+"""Prédiction de violence sur une vidéo (CPU ou GPU) pour les scripts d'évaluation.
 
-Le prétraitement est le MÊME que pendant l'entraînement (train_videomae.py) : 16 images
-régulièrement espacées, 224x224, RGB, normalisation ImageNet.
+Le modèle et le prétraitement viennent de vigilis_ai/violence.py (une seule source, la même que le service en direct) ;
+ils sont identiques à ceux de l'entraînement (train_videomae.py) : 16 images, 224x224, RGB, normalisation ImageNet.
 """
+import sys
+from pathlib import Path
+
 import cv2
 import numpy as np
 import torch
-from transformers import VideoMAEForVideoClassification
 
-from clips import sample_indices
-
-BASE = "MCG-NJU/videomae-base-finetuned-kinetics"
-MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
-STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
-
-
-def load_model(weights_path: str, device: str = "cpu"):
-    model = VideoMAEForVideoClassification.from_pretrained(
-        BASE, num_labels=2, id2label={0: "normal", 1: "violence"},
-        label2id={"normal": 0, "violence": 1}, ignore_mismatched_sizes=True,
-    )
-    model.load_state_dict(torch.load(weights_path, map_location="cpu"))
-    return model.to(device).eval()
-
-
-def frames_to_tensor(frames_bgr) -> torch.Tensor:
-    """Liste de 16 images BGR -> tenseur (1, 16, 3, 224, 224)."""
-    rgb = [cv2.cvtColor(cv2.resize(f, (224, 224)), cv2.COLOR_BGR2RGB) for f in frames_bgr]
-    x = (np.stack(rgb).astype(np.float32) / 255.0 - MEAN) / STD
-    return torch.from_numpy(x).permute(0, 3, 1, 2).unsqueeze(0)
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # pour importer vigilis_ai depuis ce dossier
+from clips import sample_indices  # noqa: E402
+from vigilis_ai.violence import frames_to_tensor, load_model, violence_probability  # noqa: E402,F401
 
 
 def read_clip(path: str) -> torch.Tensor:
@@ -44,9 +28,3 @@ def read_clip(path: str) -> torch.Tensor:
         frames.append(f)
     cap.release()
     return frames_to_tensor(frames)
-
-
-@torch.no_grad()
-def violence_probability(model, x: torch.Tensor, device: str = "cpu") -> float:
-    logits = model(pixel_values=x.to(device)).logits
-    return float(torch.softmax(logits, dim=1)[0, 1])
