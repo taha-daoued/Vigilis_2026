@@ -49,6 +49,15 @@ violent**. Relevé fait sur l'enregistrement d'écran de la fenêtre (probabilit
 Lecture prudente : **aucune fausse alerte** sur des gestes normaux et des poussées légères, mais cet essai ne prouve pas que
 la violence jouée serait détectée (la scène n'était pas violente). Un seul essai, deux personnes, 3 à 4 fenêtres.
 
+**Second essai (17/11/2026, 27 s) : bagarre jouée sans contact réel** (coups de poing mimés, bousculade, deux personnes,
+couloir, vue de face à 2-3 m). Probabilité affichée : 0,00 jusqu'à 12 s, 0,16 de 14 à 22 s, 0,07 ensuite : **maximum 0,16,
+jamais au-dessus de 0,5, aucune alerte : la bagarre jouée n'est pas détectée.** Contrôle : l'enregistrement de la scène
+donné au modèle à pleine cadence (16 images sur 5 s, fenêtres glissantes) donne 0,02 à 0,23 : ce n'est donc **pas** un défaut
+de cadence de la chaîne en direct (qui traite environ 2,5 à 3 images par seconde, comme les clips d'entraînement) mais une
+limite du modèle sur ce type de scène (**écart de domaine** : RLVS = bagarres filmées dans la rue ou au téléphone, souvent à
+plusieurs ; ici, une scène jouée en intérieur, mouvements mimés et retenus). Le seuil n'a **pas** été modifié pour
+« faire passer » ces essais (cela reviendrait à régler sur deux vidéos de démonstration).
+
 ## Limites
 - RLVS est facile et très homogène (vidéos de rue, de téléphone, de caméra). Un F1 de 0,98 est proche de la validation : il
   n'y a pas de surapprentissage visible, mais cela ne prédit pas la performance dans une scène de salon ou de démonstration.
