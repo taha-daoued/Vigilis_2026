@@ -1,7 +1,7 @@
 # Vigilis : compte-rendu d'avancement
 
 PFE solo, soutenance le 05/12/2026. Compte-rendu mis à jour le **17/11/2026** (J3-J4 sur 20 du planning). Dépôt :
-https://github.com/taha-daoued/Vigilis_2026 (23 commits). Documentation technique : `docs/DOCUMENTATION.md`.
+https://github.com/taha-daoued/Vigilis_2026. Documentation technique : `docs/DOCUMENTATION.md`.
 
 ## 1. En bref
 - Le **chemin SOS de bout en bout fonctionne avec de vrais comptes** : bouton, backend FastAPI, Firestore, dashboard admin
