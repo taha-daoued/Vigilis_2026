@@ -39,6 +39,16 @@ Erreurs : 4 fausses alertes (`NV_20`, `NV_558`, `NV_571`, `NV_687`) et 1 violenc
 VideoMAE apporte environ 24 points de F1 : le gain justifie son coût de calcul sur ce jeu. La baseline reste utile : elle
 est quasi instantanée, mais elle confond fortement « beaucoup de mouvement » (sport, danse) avec violence.
 
+## Essai en direct sur webcam (17/11/2026, un seul essai de 48 s)
+Deux personnes dans un couloir : discussion, mains posées sur l'épaule, poussées légères et jeu de bras, **sans contact
+violent**. Relevé fait sur l'enregistrement d'écran de la fenêtre (probabilité affichée toutes les 2 s) :
+- probabilité de violence : **0,01 à 0,05** pendant 30 s, puis **0,26** de 34 s à la fin (fenêtre contenant les poussées) ;
+- **jamais au-dessus du seuil de 0,5 : aucune alerte** envoyée (aucune nouvelle ligne dans Firestore) ;
+- la valeur affichée ne change que toutes les 12 à 16 s environ (contre 7 s mesurées seules) : la pose et la violence se
+  partagent le processeur.
+Lecture prudente : **aucune fausse alerte** sur des gestes normaux et des poussées légères, mais cet essai ne prouve pas que
+la violence jouée serait détectée (la scène n'était pas violente). Un seul essai, deux personnes, 3 à 4 fenêtres.
+
 ## Limites
 - RLVS est facile et très homogène (vidéos de rue, de téléphone, de caméra). Un F1 de 0,98 est proche de la validation : il
   n'y a pas de surapprentissage visible, mais cela ne prédit pas la performance dans une scène de salon ou de démonstration.
