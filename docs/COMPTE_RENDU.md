@@ -12,7 +12,8 @@ https://github.com/taha-daoued/Vigilis_2026 (23 commits). Documentation techniqu
   par l'admin. C'est **un seul essai, dans un cas facile** (vue de face, corps entier visible) : à répéter.
 - La **détection de chute est mesurée sur un jeu public** : résultat modeste (4 chutes sur 17, 1 fausse alerte sur 20 sur
   le jeu mis de côté). Je la présente comme **expérimentale**.
-- Le **modèle de violence est entraîné mais pas branché ni évalué sur le jeu de test** : c'est le principal écart au planning.
+- Le **modèle de violence est évalué sur le test verrouillé (F1 0,984 contre 0,748 pour une baseline de mouvement), mais pas
+  encore branché** sur un flux caméra : c'est le principal écart restant au planning. Il est lent sur CPU (7,1 s par clip).
 - Aucune évaluation sur des vidéos filmées par l'équipe à ce jour.
 
 ## 2. Ce qui a été réalisé
@@ -22,7 +23,7 @@ https://github.com/taha-daoued/Vigilis_2026 (23 commits). Documentation techniqu
 | Backend FastAPI | `/health`, `/me`, `POST /sos`, `GET`/`PATCH /incidents`, `GET /logs`, `POST /incidents` (service IA, clé API) ; rôles par *custom claim* | 63 tests ; essais réels sur Firestore |
 | Firebase | Auth (e-mail et Google activés), Firestore `europe-west8`, règles de sécurité | 14 tests de règles ; 6 échouent si une règle est cassée volontairement |
 | IA, pose et chute | YOLO26-pose, suivi des personnes, règles de chute (tronc et cadre), enregistreur de points, client d'envoi | 80 tests ; pose à 144-156 ms/image sur CPU |
-| IA, violence | RLVS découpé de façon figée (1 400 / 300 / 300), VideoMAE affiné sur Kaggle | F1 de validation 0,98-0,99 (**pas une performance réelle**) |
+| IA, violence | RLVS découpé de façon figée (1 400 / 300 / 300), VideoMAE affiné sur Kaggle, baseline de mouvement, évaluation sur le test | `docs/EVALUATION_VIOLENCE.md` |
 | Évaluation | Outils d'évaluation d'un dossier de vidéos, balayage de seuils, jeu GMDCSA24 (160 vidéos, MIT) | `docs/EVALUATION_CHUTE.md` |
 
 ## 3. Résultats mesurés
@@ -32,7 +33,9 @@ https://github.com/taha-daoued/Vigilis_2026 (23 commits). Documentation techniqu
 | **Chute, mesure finale (sujet 4)** | **4 chutes sur 17, 1 fausse alerte sur 20** | petit échantillon ; réglages figés avant la mesure (commit `7ea99df`) ; mesurée **une seule fois** |
 | Pose | 144 à 156 ms par image | deux mesures ponctuelles, sans GPU |
 | Chaîne en direct (webcam, 17/11) | 1 chute simulée sur 1 détectée, alerte reçue ~7 s après la chute | un seul essai, cas facile ; non représentatif |
-| Violence (validation RLVS) | F1 0,98 à 0,99 | jeu facile ; test de 300 vidéos non utilisé |
+| **Violence, VideoMAE (test RLVS)** | **149 sur 150 détectées, 4 fausses alertes sur 150, F1 0,984** | jeu facile ; test mesuré **une seule fois**, seuil 0,5 fixé avant |
+| Violence, baseline (même test) | 114 sur 150 détectées, 41 fausses alertes, F1 0,748 | flux optique + gradient boosting ; choisi sur la validation |
+| Violence, vitesse | 7,1 s par clip de 16 images (CPU) | pas de temps réel ; fenêtres toutes les 7 à 10 s au mieux |
 
 L'immobilité a été fixée à 2 s pour l'évaluation (vidéos de 5 à 13 s), pas aux 10 s de l'usage réel. Diagnostic des chutes
 manquées : une partie ne s'étale jamais à l'écran (axe de la caméra), une partie démarre assise (chaise, lit), le reste a
@@ -47,11 +50,11 @@ une descente trop faible. Ce sont les limites de règles simples sur pose 2D.
 | J7-J8 | Données violence figées, fine-tuning | Fait (VideoMAE choisi, pas MoViNet) |
 | J9 | `GET /incidents`, WebSocket | `GET` fait ; **WebSocket non fait** (actualisation toutes les 2,5 s) |
 | J10 | Carte, détail, `PATCH` du statut et audit | Fait |
-| J11 | **Jalon : violence comparée à une baseline** | **Non fait** |
-| J12 | Intégration violence et chute, moteur de décision | Chute : fait ; **violence : non fait** |
+| J11 | **Jalon : violence comparée à une baseline** | **Fait** (VideoMAE 0,984 contre baseline 0,748 de F1) |
+| J12 | Intégration violence et chute, moteur de décision | Chute : fait ; **violence : évaluée, pas encore branchée** |
 | J13 | **Jalon : chaîne caméra, IA, FastAPI, Firestore, dashboard** | Fait pour la chute ; **validé en direct sur un essai (17/11)**, à répéter ; violence absente |
 
-Le projet est en avance sur le backend et l'IA de chute, en retard sur la violence.
+Le projet est en avance sur le backend et l'IA de chute ; la violence est évaluée et comparée, il reste à la brancher.
 
 ## 5. Décisions prises
 - **FastAPI conservé** entre le service IA et le frontend (il valorise le travail IA) ; Firestore comme base derrière lui.
@@ -71,8 +74,9 @@ Le projet est en avance sur le backend et l'IA de chute, en retard sur la violen
 ## 7. Reste à faire (priorité décroissante)
 1. **Répéter la chaîne en direct** avec la webcam (chute franche, couché lent, assis vite, marche ; noter les réussites)
    et filmer des vidéos maison avec consentement pour l'évaluation.
-2. **Violence** : mesurer sa vitesse sur ce PC, l'évaluer **une fois** sur le test verrouillé, la comparer à une baseline
-   (jalon J11), puis la brancher avec un moteur de décision (seuil, fenêtres consécutives, doublons).
+2. **Violence** : la brancher sur un flux caméra avec un moteur de décision (fenêtres glissantes, seuil, fenêtres
+   consécutives, doublons), décider du repli vers un modèle plus léger si 7 s par clip est trop lent, et la tester sur
+   des scènes jouées (sans contact réel) pour mesurer les fausses alertes hors RLVS.
 3. WebSocket, notifications FCM, connexion Google dans l'interface, image d'incident (si décidé).
 4. Déployer les règles Firestore et le frontend (avec accord), audit sécurité et vie privée, rapport, vidéo de démo de secours.
 
@@ -81,7 +85,8 @@ temps réel, évaluation sur vidéos maison.
 
 ## 8. Risques
 - **Détection de chute** : rappel faible. Atténuation : la présenter comme expérimentale, annoncer les chiffres tels quels.
-- **Violence** : modèle lourd (VideoMAE-base) dont la vitesse sur CPU n'est pas mesurée ; repli possible vers un modèle plus léger.
+- **Violence** : modèle lourd (VideoMAE-base), **7,1 s par clip sur CPU mesuré** : pas de temps réel, alerte environ
+  10 s après le début de la scène ; repli possible vers un modèle plus léger. Le F1 de 0,984 vient d'un jeu facile.
 - **Domaine** : jeux publics éloignés de la scène de démonstration ; seules les vidéos maison le montreront.
 - **Hébergement du backend** : le plan Spark n'héberge pas de Python ; démo prévue entièrement en local (ou tunnel HTTPS).
 - **Sécurité** : des clés d'accès (Kaggle, GitHub) ont été collées dans une conversation : **à révoquer** ; mots de passe de

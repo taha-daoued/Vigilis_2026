@@ -106,7 +106,8 @@ Python, OpenCV, Ultralytics (YOLO26-pose), PyTorch. Modèle : `ai/models/yolo26n
   `evaluate.py` (évaluation d'un dossier de vidéos), `tune.py` (balayage de seuils), `prepare_gmdcsa24.py`.
 - **Violence** (`ai/violence/`) : jeu RLVS découpé de façon figée (graine 2026 : 1 400 / 300 / 300, doublons du dataset
   retirés), VideoMAE-base (Kinetics-400) affiné sur Kaggle (script `train_videomae.py`, journaux dans le notebook). Le
-  modèle est entraîné mais **pas encore branché** sur un flux caméra.
+  modèle est entraîné et évalué (`infer.py`, `benchmark_speed.py`, `evaluate_test.py`, baseline `baseline.py`, voir
+  `docs/EVALUATION_VIOLENCE.md`) mais **pas encore branché** sur un flux caméra.
 
 ## 6. Installation et lancement
 Prérequis : Node 24, Python 3.13, Java (tests de règles), `firebase-tools`. Secrets hors du dépôt :
@@ -140,8 +141,10 @@ Sous Windows, l'émulateur Firestore demande un dossier temporaire court pour Ja
   **mesure finale sur le sujet 4, réglages figés : 4 chutes sur 17, 1 fausse alerte sur 20**. Immobilité de 2 s pour
   cette évaluation (vidéos courtes), pas les 10 s du direct.
 - **Pose** : 144 à 156 ms par image sur le processeur de ce PC (vidéo de surveillance, puis webcam), mesures ponctuelles.
-- **Violence** : F1 de validation entre 0,98 et 0,99 sur RLVS selon l'entraînement. **Ce n'est pas une performance
-  réelle** (jeu facile, validation, pas de test). Le jeu de test de 300 vidéos n'a **pas** été utilisé.
+- **Violence** (`docs/EVALUATION_VIOLENCE.md`) : test verrouillé de 300 vidéos RLVS, mesuré une seule fois, seuil 0,5 :
+  **VideoMAE 149 violences sur 150, 4 fausses alertes sur 150, F1 0,984**, contre **0,748** pour la baseline de mouvement
+  (flux optique + gradient boosting). Jeu facile : ne prédit pas la performance sur une scène réelle. Vitesse
+  d'inférence : **7,1 s par clip de 16 images sur CPU**.
 - **SOS et dashboard** : validés visuellement en mode connecté (alerte reçue côté admin sans rechargement), sans mesure
   chiffrée de latence.
 
@@ -149,7 +152,8 @@ Sous Windows, l'émulateur Firestore demande un dossier temporaire court pour Ja
 - Rappel faible de la détection de chute sur ce jeu (voir plus haut) ; une chute dans l'axe de la caméra ou sans
   immobilité n'est pas vue ; une personne qui fait des pompes de côté peut déclencher une fausse alerte.
 - Le score d'une alerte est un indicateur des règles, pas une probabilité.
-- Violence : non évaluée sur le jeu de test, ni sur des vidéos réalistes ; vitesse d'inférence non mesurée.
+- Violence : non évaluée sur des vidéos réalistes ou maison ; pas de temps réel sur CPU (7,1 s par clip) ; pas branchée
+  sur un flux caméra.
 - Pas de WebSocket (actualisation toutes les 2,5 s), pas de notifications FCM/e-mail, connexion Google non branchée
   dans l'interface, pas d'image d'incident (stockage non décidé), préférences de confidentialité gardées dans le
   navigateur, règles Firestore non déployées.
