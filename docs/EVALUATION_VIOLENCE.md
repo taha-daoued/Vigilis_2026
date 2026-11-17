@@ -23,10 +23,26 @@
 
 Erreurs : 4 fausses alertes (`NV_20`, `NV_558`, `NV_571`, `NV_687`) et 1 violence manquée (`V_738`, probabilité 0,485).
 
+## Baseline (jalon J11) : mouvement + classifieur simple
+- **Méthode** (`ai/violence/baseline.py`) : flux optique (OpenCV) mesuré sur 8 paires d'images consécutives par vidéo,
+  18 nombres (mouvement moyen, rapide, local sans le mouvement de caméra...), puis un classifieur classique. Trois
+  classifieurs entraînés sur train, comparés sur val (régression logistique F1 0,72 ; forêt aléatoire 0,75 ; gradient
+  boosting 0,76), le meilleur gardé, puis mesuré **une seule fois** sur le même test que VideoMAE (seuil 0,5).
+- **Résultat sur le test** (gradient boosting) : 114 violences sur 150, 41 fausses alertes sur 150, précision 0,736,
+  rappel 0,760, **F1 0,748**.
+
+| Modèle (même test de 300 vidéos) | Rappel | Fausses alertes | F1 | Temps par clip (CPU) |
+|---|---|---|---|---|
+| Baseline mouvement + gradient boosting | 0,760 | 41 sur 150 | 0,748 | < 0,5 s (non chronométré précisément) |
+| **VideoMAE affiné** | **0,993** | **4 sur 150** | **0,984** | 7,1 s |
+
+VideoMAE apporte environ 24 points de F1 : le gain justifie son coût de calcul sur ce jeu. La baseline reste utile : elle
+est quasi instantanée, mais elle confond fortement « beaucoup de mouvement » (sport, danse) avec violence.
+
 ## Limites
 - RLVS est facile et très homogène (vidéos de rue, de téléphone, de caméra). Un F1 de 0,98 est proche de la validation : il
   n'y a pas de surapprentissage visible, mais cela ne prédit pas la performance dans une scène de salon ou de démonstration.
-- Pas encore de baseline comparée (jalon J11) ni de mesure sur vidéos maison.
+- Pas encore de mesure sur vidéos maison.
 - 7,1 s par clip sur CPU : pas de temps réel ; analyse par fenêtres toutes les 7 à 10 s au mieux sur ce PC.
 - Licences : VideoMAE affiné sur RLVS (CC-BY-NC-4.0) : usage académique non commercial.
 
