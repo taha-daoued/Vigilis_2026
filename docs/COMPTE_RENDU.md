@@ -1,14 +1,15 @@
 # Vigilis : compte-rendu d'avancement
 
-PFE solo, soutenance le 05/12/2026. Compte-rendu au **16/11/2026** (J3 sur 20 du planning). Dépôt :
+PFE solo, soutenance le 05/12/2026. Compte-rendu mis à jour le **17/11/2026** (J3-J4 sur 20 du planning). Dépôt :
 https://github.com/taha-daoued/Vigilis_2026 (23 commits). Documentation technique : `docs/DOCUMENTATION.md`.
 
 ## 1. En bref
 - Le **chemin SOS de bout en bout fonctionne avec de vrais comptes** : bouton, backend FastAPI, Firestore, dashboard admin
   (alerte reçue sans rechargement). Validé visuellement.
 - Le **service IA** lit une webcam ou une vidéo, estime la pose, détecte les chutes par règles et envoie l'alerte au
-  backend. La chaîne d'envoi est vérifiée contre le vrai backend et Firestore ; **elle n'a pas encore été testée en direct
-  avec la webcam, de la chute à l'alerte affichée chez l'admin**.
+  backend. **Un premier essai en direct avec la webcam (17/11/2026) a fonctionné de bout en bout** : chute simulée sur un
+  lit, alerte créée dans Firestore environ 7 s après la chute (5 s d'immobilité exigées), prise en charge puis clôturée
+  par l'admin. C'est **un seul essai, dans un cas facile** (vue de face, corps entier visible) : à répéter.
 - La **détection de chute est mesurée sur un jeu public** : résultat modeste (4 chutes sur 17, 1 fausse alerte sur 20 sur
   le jeu mis de côté). Je la présente comme **expérimentale**.
 - Le **modèle de violence est entraîné mais pas branché ni évalué sur le jeu de test** : c'est le principal écart au planning.
@@ -30,6 +31,7 @@ https://github.com/taha-daoued/Vigilis_2026 (23 commits). Documentation techniqu
 | Chute, jeu de réglage (sujets 1-3) | 23 chutes sur 62, 0 fausse alerte sur 61 | seuils choisis sur ces vidéos : optimiste |
 | **Chute, mesure finale (sujet 4)** | **4 chutes sur 17, 1 fausse alerte sur 20** | petit échantillon ; réglages figés avant la mesure (commit `7ea99df`) ; mesurée **une seule fois** |
 | Pose | 144 à 156 ms par image | deux mesures ponctuelles, sans GPU |
+| Chaîne en direct (webcam, 17/11) | 1 chute simulée sur 1 détectée, alerte reçue ~7 s après la chute | un seul essai, cas facile ; non représentatif |
 | Violence (validation RLVS) | F1 0,98 à 0,99 | jeu facile ; test de 300 vidéos non utilisé |
 
 L'immobilité a été fixée à 2 s pour l'évaluation (vidéos de 5 à 13 s), pas aux 10 s de l'usage réel. Diagnostic des chutes
@@ -47,7 +49,7 @@ une descente trop faible. Ce sont les limites de règles simples sur pose 2D.
 | J10 | Carte, détail, `PATCH` du statut et audit | Fait |
 | J11 | **Jalon : violence comparée à une baseline** | **Non fait** |
 | J12 | Intégration violence et chute, moteur de décision | Chute : fait ; **violence : non fait** |
-| J13 | **Jalon : chaîne caméra, IA, FastAPI, Firestore, dashboard** | Fait pour la chute côté code ; **à valider en direct** |
+| J13 | **Jalon : chaîne caméra, IA, FastAPI, Firestore, dashboard** | Fait pour la chute ; **validé en direct sur un essai (17/11)**, à répéter ; violence absente |
 
 Le projet est en avance sur le backend et l'IA de chute, en retard sur la violence.
 
@@ -67,8 +69,8 @@ Le projet est en avance sur le backend et l'IA de chute, en retard sur la violen
 - Un défaut trouvé avant qu'il ne fausse les tests : le temps d'une vidéo était pris sur l'horloge de l'ordinateur.
 
 ## 7. Reste à faire (priorité décroissante)
-1. **Valider la chaîne en direct** avec la webcam (chute, alerte affichée chez l'admin) et filmer des vidéos maison avec
-   consentement (chutes, couché lent, assis vite, marche) pour l'évaluation.
+1. **Répéter la chaîne en direct** avec la webcam (chute franche, couché lent, assis vite, marche ; noter les réussites)
+   et filmer des vidéos maison avec consentement pour l'évaluation.
 2. **Violence** : mesurer sa vitesse sur ce PC, l'évaluer **une fois** sur le test verrouillé, la comparer à une baseline
    (jalon J11), puis la brancher avec un moteur de décision (seuil, fenêtres consécutives, doublons).
 3. WebSocket, notifications FCM, connexion Google dans l'interface, image d'incident (si décidé).
@@ -96,5 +98,5 @@ temps réel, évaluation sur vidéos maison.
 ## 10. Démonstration proposée (5 minutes)
 1. Dashboard admin en mode connecté, vue de la carte et de la file.
 2. Un utilisateur (fenêtre privée) envoie un **SOS** ; l'alerte apparaît chez l'admin ; prise en charge puis clôture avec résolution.
-3. **Webcam** à 2-3 m : chute simulée sur un matelas, alerte « chute » affichée chez l'admin.
+3. **Webcam** à 2-3 m : chute simulée sur un matelas, alerte « chute » affichée chez l'admin (essai réussi le 17/11).
 4. Présenter honnêtement les résultats mesurés (section 3) et les limites.
