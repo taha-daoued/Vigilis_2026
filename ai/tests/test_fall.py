@@ -119,9 +119,43 @@ def test_two_people_are_tracked_independently():
     assert [e.track_id for e in events] == [1]
 
 
-def test_person_without_track_id_is_ignored():
+def realistic(p, tid):
+    """Même personne avec un cadre réaliste (haut debout, large couchée) et l'identifiant donné (None = perdu)."""
+    k = p.keypoints
+    pts = np.array([(k[L_SHOULDER] + k[R_SHOULDER]) / 2, (k[L_HIP] + k[R_HIP]) / 2])
+    sh, hip = pts
+    up = (sh - hip) / max(np.linalg.norm(sh - hip), 1e-6)
+    cloud = np.array([sh + up * 30, hip - up * 100, sh, hip])  # tête, pieds, épaules, hanches
+    x1, y1 = cloud.min(axis=0) - 25
+    x2, y2 = cloud.max(axis=0) + 25
+    return Person(tid, p.keypoints, p.conf, (float(x1), float(y1), float(x2), float(y2)))
+
+
+def test_without_the_backup_tracking_a_person_without_id_is_ignored():
     seq = [(t, Person(None, p.keypoints, p.conf, p.box)) for t, p in fall_sequence(lie_s=14.0)]
-    assert run(seq) == []
+    assert run(seq, FallParams(link_ids=False)) == []
+
+
+def test_person_who_loses_the_tracker_id_when_lying_down_is_still_followed():
+    """Cas réel : debout id 1, puis couchée « id None » (suivi perdu) : la chute doit être vue."""
+    seq = []
+    for t, p in fall_sequence(lie_s=14.0):
+        lying = p.keypoints[L_HIP][1] > 330  # a commencé à descendre
+        seq.append((t, realistic(p, None if lying else 1)))
+    events = run(seq)
+    assert len(events) == 1
+
+
+def test_person_whose_tracker_id_changes_during_the_fall_is_still_followed():
+    seq = [(t, realistic(p, 1 if t < 3.2 else 7)) for t, p in fall_sequence(lie_s=14.0)]
+    assert len(run(seq)) == 1
+
+
+def test_a_different_person_lying_far_away_inherits_nothing():
+    """Une personne debout disparaît, une autre apparaît couchée ailleurs : pas de chute inventée."""
+    standing = [(i * DT, realistic(person(100, 300, 0), 1)) for i in range(15)]
+    lying = [(3.2 + i * DT, realistic(person(560, 440, 90), 2)) for i in range(80)]
+    assert run(standing + lying) == []
 
 
 def test_tracks_are_forgotten_after_a_while_without_visible_body():

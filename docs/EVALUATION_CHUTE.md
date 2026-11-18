@@ -24,7 +24,19 @@
 | Réglage (sujets 1-3) | tronc réglé | 21 sur 62 | 0 sur 61 |
 | Réglage (sujets 1-3) | tronc + cadre, réglages figés | 23 sur 62 | 0 sur 61 |
 | **Mesure finale (sujet 4)** | réglages figés | **4 sur 17** | **1 sur 20** |
+| Réglage (sujets 1-3), après suivi de secours (18/11) | mêmes réglages | 34 sur 62 | 1 sur 61 |
+| Sujet 4, après suivi de secours (18/11) | mêmes réglages, **seconde mesure** | 6 sur 17 | 0 sur 20 |
 
+- **Mise à jour du 18/11/2026 : suivi de secours des personnes.** Un essai en direct (webcam, chambre, personne qui
+  s'allonge sur un lit) n'a déclenché aucune alerte : le suivi du détecteur de pose attribue souvent « id None » ou un
+  nouvel identifiant à une personne qui passe à l'horizontale, et sans identifiant stable les règles n'ont plus d'histoire
+  « debout » à comparer. Correction : reconnaître la personne par la position de son cadre (à moins d'une taille de
+  personne de sa dernière position, vue il y a moins de 3 s). Les seuils n'ont **pas** changé. Résultat avec les mêmes
+  réglages : jeu de réglage **34 chutes sur 62** (avant 23) avec **1 fausse alerte sur 61** (avant 0, `S2_adl_22`) ;
+  sujet 4 **6 sur 17, 0 fausse alerte sur 20** (avant 4 sur 17, 1 sur 20). **Réserve : le sujet 4 avait déjà été mesuré une
+  fois ; cette seconde mesure n'est plus une mesure vierge** (la correction a été décidée à partir de l'essai en direct,
+  pas des résultats du sujet 4, mais ce chiffre reste à prendre avec prudence). Les mesures non biaisées viendront des
+  vidéos maison.
 - La baisse entre le réglage (23/62) et la mesure finale (4/17) est attendue : les seuils ont été choisis sur les
   sujets 1-3. Les comptes sont petits : **ne pas les présenter comme des pourcentages fiables**.
 - Les 4 chutes détectées sont des chutes marchées ou depuis le lit. L'unique fausse alerte est un exercice de

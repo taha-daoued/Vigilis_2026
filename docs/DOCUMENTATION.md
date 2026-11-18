@@ -142,7 +142,9 @@ Sous Windows, l'émulateur Firestore demande un dossier temporaire court pour Ja
 
 ## 8. Résultats mesurés
 - **Chute** (GMDCSA24, voir `docs/EVALUATION_CHUTE.md`) : jeu de réglage 23 chutes sur 62, 0 fausse alerte sur 61 ;
-  **mesure finale sur le sujet 4, réglages figés : 4 chutes sur 17, 1 fausse alerte sur 20**. Immobilité de 2 s pour
+  **mesure finale sur le sujet 4, réglages figés : 4 chutes sur 17, 1 fausse alerte sur 20** ; après la correction du
+  suivi des personnes (18/11, `FallDetector._identify`) : réglage 34 sur 62 (1 fausse alerte sur 61), sujet 4 6 sur 17
+  (0 sur 20, seconde mesure, plus vierge). Immobilité de 2 s pour
   cette évaluation (vidéos courtes), pas les 10 s du direct.
 - **Pose** : 144 à 156 ms par image sur le processeur de ce PC (vidéo de surveillance, puis webcam), mesures ponctuelles.
 - **Violence** (`docs/EVALUATION_VIOLENCE.md`) : test verrouillé de 300 vidéos RLVS, mesuré une seule fois, seuil 0,5 :

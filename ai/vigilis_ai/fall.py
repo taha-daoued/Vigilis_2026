@@ -51,6 +51,9 @@ class FallParams:
     cooldown_s: float = 30.0  # pas de seconde alerte pour la même personne avant ce délai
     reset_after_s: float = 3.0  # personne non visible depuis ce temps : on l'oublie
     history_s: float = 5.0
+    # --- suivi de secours : une personne couchée perd souvent son identifiant (id None) ou en change ---
+    link_ids: bool = True
+    link_max_dist: float = 1.0  # distance max entre deux cadres, en tailles de personne, pour dire « c'est la même »
 
 
 # Réglages choisis sur le jeu de RÉGLAGE de GMDCSA24 (sujets 1 à 3), puis figés. Ils lèvent un peu le plafond des
@@ -144,22 +147,80 @@ class _Track:
     bcy_max: float = 0.0
 
 
+class _Anchor:
+    """Dernière position connue d'une personne, pour la reconnaître quand le suivi la perd."""
+    def __init__(self, pid: int, box, t: float):
+        self.pid, self.box, self.t = pid, tuple(float(v) for v in box), t
+
+
 class FallDetector:
     def __init__(self, params: FallParams | None = None):
         self.prm = params or FallParams()
         self.tracks: dict[int, _Track] = {}
+        self._anchors: list[_Anchor] = []
+        self._real_to_pid: dict[int, int] = {}
+        self._next_pid = 1
+
+    def _identify(self, persons: list[Person], t: float) -> list[int | None]:
+        """Identifiant stable de chaque personne de l'image.
+
+        Le suivi du détecteur (id) est fiable debout, mais une personne qui passe à l'horizontale perd souvent son id
+        (None) ou en reçoit un nouveau : sans histoire « debout » on ne peut plus voir la chute. On la reconnaît donc
+        aussi par sa position : le cadre le plus proche de sa dernière position connue (à moins d'une taille de
+        personne, vue il y a moins de reset_after_s) est la même personne.
+        """
+        prm = self.prm
+        if not prm.link_ids:
+            return [p.track_id for p in persons]
+        self._anchors = [a for a in self._anchors if t - a.t <= prm.reset_after_s]
+        used: set[int] = set()
+        ids: list[int | None] = [None] * len(persons)
+        for k, p in enumerate(persons):  # 1) identifiant du suivi déjà connu
+            pid = self._real_to_pid.get(p.track_id) if p.track_id is not None else None
+            if pid is not None and pid not in used and any(a.pid == pid for a in self._anchors):
+                ids[k] = pid
+                used.add(pid)
+        for k, p in enumerate(persons):  # 2) sinon : la dernière position connue la plus proche
+            if ids[k] is not None:
+                continue
+            x1, y1, x2, y2 = p.box
+            best, best_d = None, prm.link_max_dist
+            for a in self._anchors:
+                if a.pid in used:
+                    continue
+                ax1, ay1, ax2, ay2 = a.box
+                size = max(y2 - y1, x2 - x1, ay2 - ay1, ax2 - ax1, 1.0)
+                d = math.hypot((x1 + x2 - ax1 - ax2) / 2, (y1 + y2 - ay1 - ay2) / 2) / size
+                if d <= best_d:
+                    best, best_d = a, d
+            if best is not None:
+                ids[k] = best.pid
+            else:  # 3) personne nouvelle
+                ids[k] = self._next_pid
+                self._next_pid += 1
+            used.add(ids[k])
+        for k, p in enumerate(persons):
+            if p.track_id is not None:
+                self._real_to_pid[p.track_id] = ids[k]
+            existing = next((a for a in self._anchors if a.pid == ids[k]), None)
+            if existing is None:
+                self._anchors.append(_Anchor(ids[k], p.box, t))
+            else:
+                existing.box, existing.t = tuple(float(v) for v in p.box), t
+        return ids
 
     def update(self, persons: list[Person], t: float, size: tuple[int, int]) -> list[FallEvent]:
         """À appeler pour chaque image. `t` en secondes (horloge croissante), `size` = (largeur, hauteur)."""
         events = []
-        for p in persons:
-            if p.track_id is None:  # sans identifiant de suivi, impossible de suivre l'évolution
+        pids = self._identify(persons, t)
+        for p, pid in zip(persons, pids):
+            if pid is None:  # suivi de secours désactivé et pas d'identifiant : on ne peut pas suivre
                 continue
             s = extract_sample(p, t, size, self.prm)
             bs = extract_box(p, t, size, self.prm) if self.prm.use_box else None
             if s is None and bs is None:
                 continue  # ni corps ni cadre exploitables : aucun jugement
-            tr = self.tracks.setdefault(p.track_id, _Track())
+            tr = self.tracks.setdefault(pid, _Track())
             tr.last_valid_t = t
             if s is not None:
                 tr.samples.append(s)
@@ -168,9 +229,9 @@ class FallDetector:
             for q in (tr.samples, tr.boxes):
                 while q and t - q[0].t > self.prm.history_s:
                     q.popleft()
-            ev = self._step_torso(p.track_id, tr, s) if s is not None else None
+            ev = self._step_torso(pid, tr, s) if s is not None else None
             if ev is None and bs is not None:
-                ev = self._step_box(p.track_id, tr, bs)
+                ev = self._step_box(pid, tr, bs)
             if ev:
                 tr.candidate_t = tr.box_candidate_t = None
                 events.append(ev)

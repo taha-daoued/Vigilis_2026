@@ -31,7 +31,8 @@ https://github.com/taha-daoued/Vigilis_2026. Documentation technique : `docs/DOC
 | Mesure | Résultat | Réserve |
 |---|---|---|
 | Chute, jeu de réglage (sujets 1-3) | 23 chutes sur 62, 0 fausse alerte sur 61 | seuils choisis sur ces vidéos : optimiste |
-| **Chute, mesure finale (sujet 4)** | **4 chutes sur 17, 1 fausse alerte sur 20** | petit échantillon ; réglages figés avant la mesure (commit `7ea99df`) ; mesurée **une seule fois** |
+| **Chute, mesure finale (sujet 4)** | **4 chutes sur 17, 1 fausse alerte sur 20** | petit échantillon ; réglages figés avant la mesure (commit `7ea99df`) ; mesurée une première fois |
+| Chute, après correction du suivi (18/11) | réglage : 34 sur 62 (1 fausse alerte sur 61) ; sujet 4 : 6 sur 17, 0 sur 20 | correction décidée après un essai en direct raté ; **seconde mesure du sujet 4, plus vierge** ; seuils inchangés |
 | Pose | 144 à 156 ms par image | deux mesures ponctuelles, sans GPU |
 | Chaîne en direct (webcam, 17/11) | 1 chute simulée sur 1 détectée, alerte reçue ~7 s après la chute | un seul essai, cas facile ; non représentatif |
 | **Violence, VideoMAE (test RLVS)** | **149 sur 150 détectées, 4 fausses alertes sur 150, F1 0,984** | jeu facile ; test mesuré **une seule fois**, seuil 0,5 fixé avant |
