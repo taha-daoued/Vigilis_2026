@@ -12,7 +12,7 @@ npm run dev        # développement
 npm run build && npm run preview   # version de production (PWA, hors ligne)
 npm test           # tests (moteur de décision, services mock)
 ```
-Variables (voir `web/.env.example`) : `VITE_DATA_MODE=mock`, `VITE_DEMO_CENTER=lat,lng` (défaut : Lagos).
+Variables (voir `web/.env.example`) : `VITE_DATA_MODE=mock`, `VITE_DEMO_CENTER=lat,lng` (défaut : Sfax, Tunisie).
 
 ## Mode connecté (backend FastAPI + Firestore réels)
 Prérequis : `backend/.env` (voir `backend/.env.example`) et la clé de compte de service **hors du dépôt**.

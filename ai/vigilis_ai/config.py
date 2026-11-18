@@ -32,7 +32,7 @@ def load_config(env_path: Path | None = None, environ: dict | None = None) -> Co
     if not re.fullmatch(r"[A-Za-z0-9_.-]{1,64}", camera_id):
         raise ConfigError("CAMERA_ID invalide : lettres, chiffres, _ . - seulement (64 caractères maximum).")
     try:
-        lat, lng = float(values.get("CAMERA_LAT") or 6.5244), float(values.get("CAMERA_LNG") or 3.3792)
+        lat, lng = float(values.get("CAMERA_LAT") or 34.7406), float(values.get("CAMERA_LNG") or 10.7603)
     except ValueError:
         raise ConfigError("CAMERA_LAT et CAMERA_LNG doivent être des nombres.") from None
     if not (-90 <= lat <= 90 and -180 <= lng <= 180):

@@ -1,11 +1,11 @@
 import type { Camera, LatLng } from '../services/types'
 import { distanceMeters } from './proximity'
 
-/** Centre de la démo : VITE_DEMO_CENTER="lat,lng" (par défaut Lagos, Nigeria). */
+/** Centre de la démo : VITE_DEMO_CENTER="lat,lng" (par défaut Sfax, Tunisie). */
 function parseCenter(raw: string | undefined): LatLng {
   const [lat, lng] = (raw ?? '').split(',').map((v) => Number(v.trim()))
   if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng }
-  return { lat: 6.5244, lng: 3.3792 }
+  return { lat: 34.7406, lng: 10.7603 }
 }
 
 export const DEMO_CENTER: LatLng = parseCenter(import.meta.env.VITE_DEMO_CENTER)
