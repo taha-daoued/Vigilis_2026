@@ -146,6 +146,8 @@ Sous Windows, l'émulateur Firestore demande un dossier temporaire court pour Ja
   suivi des personnes (18/11, `FallDetector._identify`) : réglage 34 sur 62 (1 fausse alerte sur 61), sujet 4 6 sur 17
   (0 sur 20, seconde mesure, plus vierge). Immobilité de 2 s pour
   cette évaluation (vidéos courtes), pas les 10 s du direct.
+- **Chute en direct** (webcam, 18/11) : 3 chutes détectées sur 5 jouées, 0 fausse alerte sur 3 gestes normaux, une
+  personne, un lit ; alerte reçue environ 7 s après la chute (voir `docs/EVALUATION_CHUTE.md`).
 - **Pose** : 144 à 156 ms par image sur le processeur de ce PC (vidéo de surveillance, puis webcam), mesures ponctuelles.
 - **Violence** (`docs/EVALUATION_VIOLENCE.md`) : test verrouillé de 300 vidéos RLVS, mesuré une seule fois, seuil 0,5 :
   **VideoMAE 149 violences sur 150, 4 fausses alertes sur 150, F1 0,984**, contre **0,748** pour la baseline de mouvement

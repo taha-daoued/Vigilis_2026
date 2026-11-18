@@ -35,6 +35,7 @@ https://github.com/taha-daoued/Vigilis_2026. Documentation technique : `docs/DOC
 | Chute, après correction du suivi (18/11) | réglage : 34 sur 62 (1 fausse alerte sur 61) ; sujet 4 : 6 sur 17, 0 sur 20 | correction décidée après un essai en direct raté ; **seconde mesure du sujet 4, plus vierge** ; seuils inchangés |
 | Pose | 144 à 156 ms par image | deux mesures ponctuelles, sans GPU |
 | Chaîne en direct (webcam, 17/11) | 1 chute simulée sur 1 détectée, alerte reçue ~7 s après la chute | un seul essai, cas facile ; non représentatif |
+| **Chute en direct (webcam, 18/11, après correction du suivi)** | **3 chutes détectées sur 5 ; 0 fausse alerte sur 3 gestes normaux** ; scores 0,85 à 0,91 ; alerte ~7 s après la chute | 8 essais, une personne, un lit ; attribution des alertes d'après les notes du testeur |
 | **Violence, VideoMAE (test RLVS)** | **149 sur 150 détectées, 4 fausses alertes sur 150, F1 0,984** | jeu facile ; test mesuré **une seule fois**, seuil 0,5 fixé avant |
 | Violence, baseline (même test) | 114 sur 150 détectées, 41 fausses alertes, F1 0,748 | flux optique + gradient boosting ; choisi sur la validation |
 | Violence, vitesse | 7,1 s par clip de 16 images (CPU) | pas de temps réel ; fenêtres toutes les 7 à 10 s au mieux |

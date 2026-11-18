@@ -44,6 +44,20 @@
 - Sur les 13 chutes manquées du sujet 4, une seule a le corps visible dans moins de la moitié des mesures : le
   problème n'est pas surtout la visibilité.
 
+## Essai en direct sur webcam (18/11/2026, après le suivi de secours)
+Une personne, chambre, caméra fixe, corps entier visible, immobilité exigée 5 s (`--confirm-s 5`), réglages par défaut du
+direct. Le testeur a joué **5 chutes** sur le lit et **3 gestes normaux** (non précisés). Résultat vérifié dans Firestore :
+**3 alertes reçues** (scores 0,91, 0,85, 0,86 ; 5 s d'immobilité confirmées ; reçues environ 7 s après la chute).
+
+| Essais | Alertes | Lecture |
+|---|---|---|
+| 5 chutes jouées | 3 alertes | **3 chutes détectées sur 5** (60 %), en attribuant les 3 alertes à des chutes |
+| 3 gestes normaux | 0 alerte attribuée | **0 fausse alerte sur 3**, selon les notes du testeur |
+
+Réserves : très petit échantillon, une seule personne, une seule scène (lit) ; l'attribution des alertes aux essais vient
+des notes du testeur, **pas d'un enregistrement vérifié** ; les 2 chutes manquées n'ont pas été analysées. Ces chiffres
+ne remplacent pas la mesure sur le jeu public ; ils montrent que la chaîne fonctionne en direct.
+
 ## Pourquoi tant de chutes manquées (diagnostic sur le jeu de réglage)
 Sur 39 chutes manquées : environ 16 n'ont jamais un cadre de personne assez large (la personne ne s'étale pas à
 l'écran, par exemple chute dans l'axe de la caméra) ; 12 démarrent assis (chaise, lit), donc sans phase « debout »
