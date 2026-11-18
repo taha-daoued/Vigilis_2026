@@ -54,9 +54,16 @@ direct. Le testeur a joué **5 chutes** sur le lit et **3 gestes normaux** (non 
 | 5 chutes jouées | 3 alertes | **3 chutes détectées sur 5** (60 %), en attribuant les 3 alertes à des chutes |
 | 3 gestes normaux | 0 alerte attribuée | **0 fausse alerte sur 3**, selon les notes du testeur |
 
-Réserves : très petit échantillon, une seule personne, une seule scène (lit) ; l'attribution des alertes aux essais vient
-des notes du testeur, **pas d'un enregistrement vérifié** ; les 2 chutes manquées n'ont pas été analysées. Ces chiffres
-ne remplacent pas la mesure sur le jeu public ; ils montrent que la chaîne fonctionne en direct.
+**Seconde session le même jour (enregistrement d'écran de 122 s, vérifié image par image) : 3 chutes jouées sur le lit,
+3 alertes** (bandeau « CHUTE DETECTEE » à 15 s, 67 s et 109 s, correspondant aux 3 alertes de Firestore, scores 0,88 à 0,89),
+**aucune fausse alerte** sur les mouvements normaux visibles (debout, marche, assis sur le lit, relevé, couché long après
+une alerte). Total des deux sessions : **6 chutes détectées sur 8 jouées**. Les alertes de cette session portent la position
+lue sur le PC (`CAMERA_LOCATION=auto`, précision 37 m), cohérente avec la carte de Sfax.
+
+Réserves : très petit échantillon, une seule personne, une seule scène (lit), chutes vers l'avant et vers le lit, de face ;
+pour la première session l'attribution des alertes aux essais vient des notes du testeur, **pas d'un enregistrement
+vérifié** ; les 2 chutes manquées n'ont pas été analysées. Ces chiffres ne remplacent pas la mesure sur le jeu public ;
+ils montrent que la chaîne fonctionne en direct.
 
 ## Pourquoi tant de chutes manquées (diagnostic sur le jeu de réglage)
 Sur 39 chutes manquées : environ 16 n'ont jamais un cadre de personne assez large (la personne ne s'étale pas à
