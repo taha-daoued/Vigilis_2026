@@ -7,15 +7,19 @@ https://github.com/taha-daoued/Vigilis_2026. Documentation technique : `docs/DOC
 - Le **chemin SOS de bout en bout fonctionne avec de vrais comptes** : bouton, backend FastAPI, Firestore, dashboard admin
   (alerte reçue sans rechargement). Validé visuellement.
 - Le **service IA** lit une webcam ou une vidéo, estime la pose, détecte les chutes par règles et envoie l'alerte au
-  backend. **Un premier essai en direct avec la webcam (17/11/2026) a fonctionné de bout en bout** : chute simulée sur un
-  lit, alerte créée dans Firestore environ 7 s après la chute (5 s d'immobilité exigées), prise en charge puis clôturée
-  par l'admin. C'est **un seul essai, dans un cas facile** (vue de face, corps entier visible) : à répéter.
-- La **détection de chute est mesurée sur un jeu public** : résultat modeste (4 chutes sur 17, 1 fausse alerte sur 20 sur
-  le jeu mis de côté). Je la présente comme **expérimentale**.
+  backend. **Les essais en direct avec la webcam (17-18/11/2026) fonctionnent de bout en bout** : 6 chutes jouées détectées
+  sur 8, aucune fausse alerte observée, alerte reçue environ 7 s après la chute (5 s d'immobilité exigées), position
+  lue sur le PC ; un premier essai avait échoué à cause du suivi des personnes, corrigé. **Petit échantillon, une
+  personne, un lit, de face** : à élargir.
+- La **détection de chute est mesurée sur un jeu public** : résultat modeste (6 chutes sur 17, 0 fausse alerte sur 20 sur
+  le jeu mis de côté, après la correction du suivi ; 4 sur 17 avant). Je la présente comme **expérimentale**.
 - Le **modèle de violence est évalué sur le test verrouillé (F1 0,984 contre 0,748 pour une baseline de mouvement) et branché
-  sur la caméra** (option `--violence`, alerte après 2 fenêtres consécutives). Vérifié sur un montage de clips RLVS, **pas
-  encore testé en direct sur webcam**. Il est lent sur CPU (7,1 s par clip) et ralentit la pose quand les deux tournent.
-- Aucune évaluation sur des vidéos filmées par l'équipe à ce jour.
+  sur la caméra** (option `--violence`, alerte après 2 fenêtres consécutives). Vérifié sur un montage de clips RLVS, puis **testé en
+  direct : aucune fausse alerte sur des gestes normaux, mais une bagarre jouée sans contact n'est pas détectée** (probabilité
+  maximale 0,16) : écart entre RLVS et une scène d'intérieur. Il est lent sur CPU (7,1 s par clip) et ralentit la pose quand
+  les deux tournent.
+- Les évaluations sur vidéos filmées par l'équipe se limitent à ces essais en direct ; le protocole de clips maison est prêt
+  (`docs/PROTOCOLE_VIDEOS_MAISON.md`), les clips ne sont pas encore tournés.
 
 ## 2. Ce qui a été réalisé
 | Bloc | Contenu | Preuves |
@@ -54,8 +58,8 @@ une descente trop faible. Ce sont les limites de règles simples sur pose 2D.
 | J9 | `GET /incidents`, WebSocket | `GET` fait ; **WebSocket non fait** (actualisation toutes les 2,5 s) |
 | J10 | Carte, détail, `PATCH` du statut et audit | Fait |
 | J11 | **Jalon : violence comparée à une baseline** | **Fait** (VideoMAE 0,984 contre baseline 0,748 de F1) |
-| J12 | Intégration violence et chute, moteur de décision | Chute : fait ; **violence : branchée (fenêtres glissantes, 2 fenêtres consécutives), vérifiée sur un montage RLVS, pas encore testée en direct** |
-| J13 | **Jalon : chaîne caméra, IA, FastAPI, Firestore, dashboard** | Fait pour la chute ; **validé en direct sur un essai (17/11)**, à répéter ; violence absente |
+| J12 | Intégration violence et chute, moteur de décision | Chute : fait ; **violence : branchée (fenêtres glissantes, 2 fenêtres consécutives), testée en direct : aucune fausse alerte mais une bagarre jouée n'est pas détectée (écart de domaine)** |
+| J13 | **Jalon : chaîne caméra, IA, FastAPI, Firestore, dashboard** | **Fait pour la chute : validé en direct (6 sur 8 chutes jouées détectées, 17-18/11)** ; violence branchée mais non détectée sur une scène jouée |
 
 Le projet est en avance sur le backend et l'IA de chute ; la violence est évaluée et comparée, il reste à la brancher.
 
@@ -75,11 +79,12 @@ Le projet est en avance sur le backend et l'IA de chute ; la violence est évalu
 - Un défaut trouvé avant qu'il ne fausse les tests : le temps d'une vidéo était pris sur l'horloge de l'ordinateur.
 
 ## 7. Reste à faire (priorité décroissante)
-1. **Répéter la chaîne en direct** avec la webcam (chute franche, couché lent, assis vite, marche ; noter les réussites)
-   et filmer des vidéos maison avec consentement pour l'évaluation.
-2. **Violence** : la tester en direct sur webcam avec des scènes jouées (sans contact réel) pour mesurer les fausses
-   alertes hors RLVS, et décider du repli vers un modèle plus léger si la lenteur (7 s par clip, pose ralentie à
-   420-530 ms par image quand les deux tournent) est trop gênante.
+1. **Chute** : élargir les essais en direct (chute vers l'arrière ou de côté, couché lent, assis vite, personne partiellement
+   cachée), analyser les 2 chutes manquées du 18/11 sur enregistrement, et filmer des vidéos maison avec consentement.
+2. **Violence** : le modèle ne détecte pas une bagarre jouée en intérieur (maximum 0,16 sur 27 s). Décider avec
+   l'encadrant : tourner des clips maison (protocole `docs/PROTOCOLE_VIDEOS_MAISON.md`, outil prêt) pour mesurer puis
+   affiner en local, ou une approche par la pose ; trancher aussi le repli vers un modèle plus léger (7 s par clip, pose
+   ralentie à 420-530 ms par image quand les deux tournent).
 3. WebSocket, notifications FCM, connexion Google dans l'interface, image d'incident (si décidé).
 4. Déployer les règles Firestore et le frontend (avec accord), audit sécurité et vie privée, rapport, vidéo de démo de secours.
 
