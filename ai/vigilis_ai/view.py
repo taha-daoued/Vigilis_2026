@@ -17,6 +17,7 @@ import cv2
 from vigilis_ai.client import Sender, build_fall_body, build_violence_body
 from vigilis_ai.clock import FrameClock
 from vigilis_ai.config import ConfigError, load_config
+from vigilis_ai.location import apply_auto_location
 from vigilis_ai.fall import FallDetector, FallParams, extract_sample, tuned_params
 from vigilis_ai.pose import PoseEstimator, draw
 from vigilis_ai.violence import ViolenceMonitor, ViolenceParams, make_predictor
@@ -47,6 +48,9 @@ def main() -> None:
             cfg = load_config()
         except ConfigError as e:
             raise SystemExit(str(e)) from None
+        cfg, note = apply_auto_location(cfg)
+        if note:
+            print(note)
         sender = Sender(cfg)
         print(f"Envoi activé vers {cfg.api_url} (caméra {cfg.camera_id}).")
 

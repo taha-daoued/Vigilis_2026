@@ -101,7 +101,12 @@ Python, OpenCV, Ultralytics (YOLO26-pose), PyTorch. Modèle : `ai/models/yolo26n
   Ne déclenchent rien : se coucher lentement, s'asseoir vite, se pencher. Réglages figés : `fall.TUNED` (`--tuned`).
 - `client.py` : envoi des alertes à `POST /incidents` **en arrière-plan** (la détection n'attend jamais le réseau),
   reprises sur coupure ou erreur serveur, pas de nouvel essai sur 401/403/422. La clé API et la position ne sont
-  jamais écrites dans les journaux (testé). `config.py` lit `ai/.env`.
+  jamais écrites dans les journaux (testé). `config.py` lit `ai/.env`. Position de la caméra : coordonnées fixes `CAMERA_LAT`/`CAMERA_LNG` (recommandé pour
+  une caméra fixe) ou `CAMERA_LOCATION=auto` : lue au démarrage sur le service de localisation de Windows
+  (`location.py`, Wi-Fi, précision de quelques dizaines de mètres, 37 m mesurés sur ce PC) avec repli sur les
+  coordonnées fixes si le service est désactivé ou trop imprécis (> 2 km) ; les coordonnées ne sont jamais affichées
+  dans les journaux. Pour le SOS, la position vient du navigateur (`navigator.geolocation`, avec la permission de
+  l'utilisateur), avec le centre de la démo en repli.
 - Outils : `view.py` (affichage et envoi), `record.py` (enregistre les **points**, jamais les images), `replay.py`,
   `evaluate.py` (évaluation d'un dossier de vidéos), `tune.py` (balayage de seuils), `prepare_gmdcsa24.py`.
 - **Violence** (`ai/violence/`) : jeu RLVS découpé de façon figée (graine 2026 : 1 400 / 300 / 300, doublons du dataset

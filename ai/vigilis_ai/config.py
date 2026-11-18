@@ -20,6 +20,7 @@ class Config:
     camera_id: str
     camera_lat: float
     camera_lng: float
+    auto_location: bool = False  # CAMERA_LOCATION=auto : position lue sur le PC au démarrage (voir location.py)
 
 
 def load_config(env_path: Path | None = None, environ: dict | None = None) -> Config:
@@ -37,4 +38,8 @@ def load_config(env_path: Path | None = None, environ: dict | None = None) -> Co
         raise ConfigError("CAMERA_LAT et CAMERA_LNG doivent être des nombres.") from None
     if not (-90 <= lat <= 90 and -180 <= lng <= 180):
         raise ConfigError("CAMERA_LAT doit être entre -90 et 90, CAMERA_LNG entre -180 et 180.")
-    return Config((values.get("VIGILIS_API_URL") or "http://localhost:8000").rstrip("/"), api_key, camera_id, lat, lng)
+    auto = (values.get("CAMERA_LOCATION") or "fixed").strip().lower()
+    if auto not in ("fixed", "auto"):
+        raise ConfigError("CAMERA_LOCATION doit valoir « fixed » (coordonnées de ai/.env) ou « auto » (position du PC).")
+    return Config((values.get("VIGILIS_API_URL") or "http://localhost:8000").rstrip("/"), api_key, camera_id, lat, lng,
+                  auto == "auto")
